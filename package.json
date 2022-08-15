@@ -1,0 +1,30 @@
+{
+    "name": "test",
+    "version": "0.0.1",
+    "description": "view与template的关系库,为了低代码创建。🧩",
+    "main": "index.js",
+    "scripts": {
+        "test": "jest",
+        "build": "rollup --config"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/fromIceWorld/parseHTML.git"
+    },
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/fromIceWorld/parseHTML/issues"
+    },
+    "homepage": "https://github.com/fromIceWorld/parseHTML#readme",
+    "devDependencies": {
+        "@rollup/plugin-node-resolve": "^13.2.1",
+        "@rollup/plugin-typescript": "^8.3.2",
+        "jest": "^27.5.1",
+        "tslib": "^2.3.1",
+        "typescript": "^4.6.3"
+    },
+    "dependencies": {
+        "my-world": "0.0.1"
+    }
+}

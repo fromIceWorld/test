@@ -17,6 +17,13 @@ import { CheckDetectChange, Component, Inject } from 'my-world';
             <option>C</option>
         </select>
         ||select值: {{selectDrop}} ||
+
+        <select multiple % = "mulSelectData" size="4">
+            <option>AA</option>
+            <option>BB</option>
+            <option>CC</option>
+        </select>
+        ||  mulSelect值:  {{mulSelectData}} ||
             <input id="radio" type="radio" value="少年" %="selectRadio" name="Radio"></input>
             <label for="radio">少年</label>
             <input id="radio2" type="radio" value="青年" %="selectRadio"  name="Radio"></input>
@@ -78,7 +85,8 @@ class MyComponent {
     class2 = false;
     selectRadio = '少年';
     selectDrop = 'C';
-    checkboxData = [];
+    checkboxData = ['苹果'];
+    mulSelectData = [];
     constructor(@Inject(CheckDetectChange) private cd: CheckDetectChange) {}
 
     emit(e: EventTarget, value: any) {

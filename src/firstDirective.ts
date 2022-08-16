@@ -1,31 +1,32 @@
-import { elementNode, Input, TemplateView } from 'my-world';
-
+import { Directive, elementNode, Input, TemplateView } from 'my-world';
+@Directive({
+    selector: '[data-angular]',
+})
 class firstDirective {
     @Input('name')
     arr: any;
     name = '第一个指令';
-    static selector = '[data-angular]';
     constructor() {
         console.log('实例化指令');
     }
-    OnInit(native: Element, Tnode: elementNode) {
+    OnInit(host: Element, Tnode: elementNode) {
         console.log(
             '%cfirstDirective: %cOnInit',
             'color: #2c5dc1',
             'color: blue',
-            native,
+            host,
             Tnode
         );
     }
-    Oninserted(native: Element) {
+    OnHostInserted(parentNative: Element) {
         console.log(
             '%cfirstDirective: %cOninserted',
             'color:#2c5dc1',
             'color:#ff6500',
-            native
+            parentNative
         );
     }
-    OnInputChanges(changesObj: any) {
+    OnHostInputChanges(changesObj: any) {
         console.log(
             '%cfirstDirective: %cOnInputChanges',
             'color:#2c5dc1',

@@ -1,5 +1,7 @@
-import { Input, ViewContainer } from 'my-world';
-
+import { Directive, Input, ViewContainer } from 'my-world';
+@Directive({
+    selector: '[forOf]',
+})
 class forof {
     @Input('forOf')
     arr: Array<any>;
@@ -7,7 +9,6 @@ class forof {
     item: string = 'item';
     @Input('index')
     index: string = 'index';
-    static selector = 'forOf';
     constructor(private container: ViewContainer) {}
     OnInputChanges(changesObj: any) {
         let views: Array<any> = [];

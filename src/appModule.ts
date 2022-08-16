@@ -4,6 +4,7 @@ import { IronComponent } from './components/iron';
 import { SpiderComponent } from './components/spider';
 import { Spider2Component } from './components/spider2';
 import { demoComponent } from './demo';
+import { fromControlDirective } from './directives/formcontrol';
 import { firstDirective } from './firstDirective';
 import { forof } from './forOf';
 import { bIf } from './if';
@@ -21,6 +22,7 @@ import { TestComponent } from './test';
         TestComponent,
         IronComponent,
         SpiderComponent,
+        fromControlDirective,
     ],
     providers: [],
     imports: [RouterModule],

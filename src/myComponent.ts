@@ -1,8 +1,12 @@
-import { CheckDetectChange, Component, Inject } from "my-world";
+import { CheckDetectChange, Component, Inject } from 'my-world';
 @Component({
-  selector: `#root`,
-  styles: ``,
-  template: `
+    selector: `#root`,
+    styles: ``,
+    template: `
+    <form>
+        <span>姓名：</span><input &fromControl="fromControlName"></input><br></br>
+        <span>性别：</span><input></input>
+    </form>
         <textarea %="exp2" ></textarea>
         <text %="exp" ></text>
         <input %="exp2"></input>
@@ -29,9 +33,7 @@ import { CheckDetectChange, Component, Inject } from "my-world";
             <label for="radio">少年</label>
             <input id="radio2" type="radio" value="青年" %="selectRadio"  name="Radio"></input>
             <label for="radio2">青年</label>
-            <div>
-            {{selectRadio}}
-            </div>
+            ||  radio值:  {{selectRadio}}||
        
         <div
             data-angular
@@ -77,56 +79,57 @@ import { CheckDetectChange, Component, Inject } from "my-world";
     `,
 })
 class MyComponent {
-  exp = "第一个插值";
-  displayIf: boolean = true;
-  exp2 = "第2个插值";
-  block = "com";
-  dataWidth = "200px";
-  class1 = true;
-  class2 = false;
-  selectRadio = "少年";
-  selectDrop = ["C"];
-  checkboxData = ["苹果"];
-  mulSelectData = ["BB"];
-  constructor(@Inject(CheckDetectChange) private cd: CheckDetectChange) {}
+    exp = '第一个插值';
+    displayIf: boolean = true;
+    exp2 = '第2个插值';
+    block = 'com';
+    dataWidth = '200px';
+    class1 = true;
+    class2 = false;
+    selectRadio = '少年';
+    selectDrop = ['C'];
+    checkboxData = ['苹果'];
+    mulSelectData = ['BB'];
+    fromControlName = {};
+    constructor(@Inject(CheckDetectChange) private cd: CheckDetectChange) {}
 
-  emit(e: EventTarget, value: any) {
-    console.log(e, value, this);
-  }
-  OnInputChanges(changesObj: any) {
-    console.log(
-      "%cmyComponent: %cOnIputChanges",
-      "color:green",
-      "color:#ff6500",
-      changesObj
-    );
-  }
-  OnInit() {
-    console.log("%cmyComponent: %cOnInit", "color:green", "color:blue");
-    console.log(this.router);
-  }
-  OnSlotInit() {
-    console.log("%cmyComponent: %cOnSlotInit", "color:green", "color:blue");
-  }
-  OnSlotChecked() {
-    console.log(
-      "%cmyComponent: %cOnSlotChecked",
-      "color:green",
-      "color:#ff6500"
-    );
-  }
-  OnViewInit() {
-    console.log("%cmyComponent: %cOnViewInit", "color:green", "color:blue");
-  }
-  OnViewChecked() {
-    console.log(
-      "%cmyComponent: %cOnViewChecked",
-      "color:green",
-      "color:#ff6500"
-    );
-  }
-  OnDestroy() {
-    console.log("%cmyComponent: %cOnDestroy", "color:green", "color:red");
-  }
+    emit(e: EventTarget, value: any) {
+        console.log(e, value, this);
+    }
+    OnInputChanges(changesObj: any) {
+        console.log(
+            '%cmyComponent: %cOnIputChanges',
+            'color:green',
+            'color:#ff6500',
+            changesObj
+        );
+    }
+    OnInit() {
+        console.log('%cmyComponent: %cOnInit', 'color:green', 'color:blue');
+        console.log(this.router);
+    }
+    OnSlotInit() {
+        console.log('%cmyComponent: %cOnSlotInit', 'color:green', 'color:blue');
+    }
+    OnSlotChecked() {
+        console.log(
+            '%cmyComponent: %cOnSlotChecked',
+            'color:green',
+            'color:#ff6500'
+        );
+    }
+    OnViewInit() {
+        console.log('%cmyComponent: %cOnViewInit', 'color:green', 'color:blue');
+    }
+    OnViewChecked() {
+        console.log(
+            '%cmyComponent: %cOnViewChecked',
+            'color:green',
+            'color:#ff6500'
+        );
+    }
+    OnDestroy() {
+        console.log('%cmyComponent: %cOnDestroy', 'color:green', 'color:red');
+    }
 }
 export { MyComponent };

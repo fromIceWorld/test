@@ -9,6 +9,14 @@ class firstDirective {
     constructor() {
         console.log('实例化指令');
     }
+    OnBind(host: Element) {
+        console.log(
+            '%cfirstDirective: %cOnBind',
+            'color: #2c5dc1',
+            'color: blue',
+            host
+        );
+    }
     OnInit(host: Element, Tnode: elementNode) {
         console.log(
             '%cfirstDirective: %cOnInit',
@@ -18,25 +26,25 @@ class firstDirective {
             Tnode
         );
     }
-    OnHostInserted(parentNative: Element) {
+    OnInputChanges(changeObj) {
         console.log(
-            '%cfirstDirective: %cOninserted',
-            'color:#2c5dc1',
-            'color:#ff6500',
-            parentNative
+            '%cfirstDirective: %cOnInit',
+            'color: #2c5dc1',
+            'color: blue',
+            changeObj
         );
     }
-    OnHostInputChanges(changesObj: any) {
+    OnViewInit(tView: TemplateView) {
         console.log(
-            '%cfirstDirective: %cOnInputChanges',
+            '%cfirstDirective: %cOnViewInit',
             'color:#2c5dc1',
             'color:#ff6500',
-            changesObj
+            tView
         );
     }
-    OnViewUpdateed(tView: TemplateView) {
+    OnViewUpdated(tView: TemplateView) {
         console.log(
-            '%cfirstDirective: %cOnViewUpdateed',
+            '%cfirstDirective: %cOnViewUpdated',
             'color:#2c5dc1',
             'color:#ff6500',
             tView

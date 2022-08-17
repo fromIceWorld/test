@@ -10,11 +10,13 @@ import { Component, EventEmitter, Input, Output } from 'my-world';
         </div>
         <p *if="desc">app-child[child组件的 Value]:{{ childValue }}</p>
         <h1>-------------------demoComponent-----------end-------------</h1>
+        {{ parentValue }}
     `,
     styles: '',
 })
 class demoComponent {
     @Input('value') childValue: string;
+    @Input('childValue') parentValue: string;
     @Output('childEmit')
     arrs = [0, 1, 2, 3];
     emitBuild?: EventEmitter;
@@ -56,9 +58,16 @@ class demoComponent {
             'color:blue'
         );
     }
-    OnViewChecked() {
+    OnUpdated() {
         console.log(
-            '%cdemoComponent: %cOnViewChecked',
+            '%cdemoComponent: %OnUpdated',
+            'color:#bf7313',
+            'color:#ff6500'
+        );
+    }
+    OnViewUpdated() {
+        console.log(
+            '%cdemoComponent: %OnViewUpdated',
             'color:#bf7313',
             'color:#ff6500'
         );

@@ -23,6 +23,7 @@ import { Component, EventEmitter, Input, Output } from 'my-world';
             item="item"
             index="index"
             &style="{color:item.color}"
+            &childValue="chidComponentValue"
         ></app-demo>
         <p>my-component value:{{ parentValue }}</p>
         <slot name="slot1"></slot>
@@ -33,13 +34,14 @@ import { Component, EventEmitter, Input, Output } from 'my-world';
 })
 class ChilComponent {
     @Input('value') parentValue?: string;
-    @Output('childEmit')
+    @Output('childEmit') childEmit: any;
     arr = [
         { color: 'rgb(255 107 137)', desc: '第一个' },
         { color: 'rgb(123 122 78)', desc: '第二个' },
     ];
     emitBuild?: EventEmitter;
     desc = '[child组件中的插值]';
+    chidComponentValue = 'children组件的值';
     constructor() {}
     OnInputChanges(changesObj: any) {
         console.log(
@@ -48,26 +50,13 @@ class ChilComponent {
             'color:#ff6500',
             changesObj
         );
+        this.chidComponentValue = 'children组件【更新】的值';
     }
     OnInit() {
         console.log(
             '%cChilComponent: %cOnIinit',
             'color:#bf7313',
             'color:blue'
-        );
-    }
-    OnSlotInit() {
-        console.log(
-            '%cChilComponent: %cOnSlotInit',
-            'color:#bf7313',
-            'color:blue'
-        );
-    }
-    OnSlotChecked() {
-        console.log(
-            '%cChilComponent: %cOnSlotChecked',
-            'color:#bf7313',
-            'color:#ff6500'
         );
     }
     OnViewInit() {
@@ -77,9 +66,16 @@ class ChilComponent {
             'color:blue'
         );
     }
-    OnViewChecked() {
+    OnUpdated() {
         console.log(
-            '%cChilComponent: %cOnViewChecked',
+            '%cChilComponent: %OnUpdated',
+            'color:#bf7313',
+            'color:#ff6500'
+        );
+    }
+    OnViewUpdated() {
+        console.log(
+            '%cChilComponent: %OnViewUpdated',
             'color:#bf7313',
             'color:#ff6500'
         );

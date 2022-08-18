@@ -11,7 +11,7 @@ import {
     styles: ``,
     template: `
     <form &formGroup="myForm">
-        <span>姓名：</span><input formControlName="name"></input><br></br>
+        <span>姓名：</span><input formControlName="name"></input>|<span>{{myForm.fromControls.name.config.value}}</span><br></br>
         <span>性别：</span><input formControlName="sex"></input>
     </form>
         <textarea %="exp2" ></textarea>

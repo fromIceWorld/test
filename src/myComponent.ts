@@ -1,11 +1,18 @@
-import { CheckDetectChange, Component, Inject } from 'my-world';
+import {
+    CheckDetectChange,
+    Component,
+    formControl,
+    formGroup,
+    Inject,
+} from 'my-world';
+
 @Component({
     selector: `#root`,
     styles: ``,
     template: `
-    <form>
-        <span>姓名：</span><input &formControl="formControlName"></input><br></br>
-        <span>性别：</span><input></input>
+    <form &formGroup="myForm">
+        <span>姓名：</span><input formControlName="name"></input><br></br>
+        <span>性别：</span><input formControlName="sex"></input>
     </form>
         <textarea %="exp2" ></textarea>
         <text %="exp" ></text>
@@ -90,9 +97,10 @@ class MyComponent {
     selectDrop = ['C'];
     checkboxData = ['苹果'];
     mulSelectData = ['BB'];
-    formControlName = {
-        value: '绿巨人',
-    };
+    myForm = new formGroup({
+        name: new formControl({ value: '绿巨人' }),
+        sex: new formControl({ value: '男' }),
+    });
     constructor(@Inject(CheckDetectChange) private cd: CheckDetectChange) {}
 
     emit(e: EventTarget, value: any) {

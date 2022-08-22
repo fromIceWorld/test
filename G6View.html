@@ -1,0 +1,256 @@
+<div class="menu">
+    <div draggable="true" style="height: 200px; background: #eb9521"></div>
+</div>
+<div id="container" style="width: 1920px; height: 1080px"></div>
+<!-- 侧边配置栏 -->
+<div class="config-menu">
+    <div class="close">
+        <span>o</span>
+    </div>
+    <div class="tabs">
+        <span class="tab">styles</span>
+    </div>
+    <div class="tab-body"></div>
+</div>
+<script src="./g6.min.js"></script>
+<script>
+    let dragEvent,
+        tabBody = document.getElementsByClassName('tab-body')[0];
+    document.addEventListener(
+        'dragstart',
+        function (event) {
+            console.log(event);
+            dragEvent = event;
+            // 保存拖动元素的引用 (ref.)
+            dragEvent = event.target;
+            // 使其半透明
+            event.target.style.opacity = 0.5;
+        },
+        false
+    );
+    document.addEventListener(
+        'dragend',
+        function (event) {
+            // 重置透明度
+            event.target.style.opacity = '';
+        },
+        false
+    );
+    document.addEventListener(
+        'drop',
+        function (event) {
+            if (event.target.tagName === 'CANVAS') {
+                let { offsetX, offsetY } = event,
+                    targetX = offsetX,
+                    targetY = offsetY;
+                console.log(targetX, targetY);
+                // 阻止默认动作（如打开一些元素的链接）
+                event.preventDefault();
+                // 将拖动的元素到所选择的放置目标节点中
+                graph.addItem('node', {
+                    x: targetX,
+                    y: targetY,
+                    type: 'input',
+                    config: {
+                        text: '姓名',
+                    },
+                    id: String(Math.random()),
+                });
+                console.log(event);
+            }
+        },
+        false
+    );
+    G6.registerNode(
+        'input',
+        {
+            options: {
+                myName: 'Input',
+                size: [270, 40],
+                style: {
+                    stroke: '#FFFFFF',
+                },
+            },
+            afterDraw(cfg, group) {
+                const { config } = cfg;
+                console.log(cfg);
+                group.addShape('text', {
+                    attrs: {
+                        text: config.text,
+                        x: -130,
+                        y: 0,
+                        fontSize: 14,
+                        textAlign: 'left',
+                        textBaseline: 'middle',
+                        fill: '#000000d9',
+                    },
+                    // must be assigned in G6 3.3 and later versions. it can be any value you want
+                    name: 'text-shape',
+                });
+                group.addShape('rect', {
+                    attrs: {
+                        x: -70,
+                        y: -15,
+                        width: 200,
+                        height: 30,
+                        stroke: '#d9d9d9',
+                        radius: [2, 4],
+                    },
+                    // must be assigned in G6 3.3 and later versions. it can be any value you want
+                    name: 'rect-shape',
+                });
+            },
+        },
+        'rect'
+    );
+    const data = {
+        nodes: [
+            {
+                id: 'rect2',
+                label: '',
+                description: 'description, hidden when undefined',
+                x: 250,
+                type: 'input',
+                config: {
+                    text: '姓名',
+                },
+                y: 150,
+            },
+        ],
+    };
+
+    const width = document.getElementById('container').scrollWidth;
+    const height = document.getElementById('container').scrollHeight || 500;
+    const graph = new G6.Graph({
+        container: 'container',
+        width,
+        height,
+        // translate the graph to align the canvas's center, support by v3.5.1
+        defaultNode: {
+            type: 'modelRect',
+        },
+        modes: {
+            default: ['drag-node'],
+        },
+        nodeStateStyles: {
+            hover: {
+                lineWidth: 2,
+                stroke: '#1890ff',
+                fill: '#e6f7ff',
+            },
+        },
+    });
+
+    graph.data(data);
+    graph.render();
+
+    graph.on('node:click', (evt) => {
+        const { item, shape } = evt,
+            config = item._cfg.model.config;
+        console.log(item, shape, config);
+        for (let [key, value] of Object.entries(config)) {
+            let row = document.createElement('div'),
+                keyNative = document.createElement('div'),
+                colon = document.createElement('span'),
+                valueNative = document.createElement('div');
+            row.setAttribute('class', 'config-row');
+            colon.setAttribute('class', 'config-colon');
+            colon.appendChild(new Text(' :  '));
+            keyNative.setAttribute('class', 'style-key');
+            valueNative.setAttribute('class', 'style-value');
+            valueNative.setAttribute('contenteditable', 'true');
+            valueNative.addEventListener('blur', (e) => {
+                shape.attr(key, valueNative.childNodes[0].nodeValue);
+                config[key] = valueNative.childNodes[0].nodeValue;
+            });
+            keyNative.appendChild(new Text(key));
+            valueNative.appendChild(new Text(value));
+            row.append(keyNative, colon, valueNative);
+            tabBody.replaceChildren(row);
+        }
+    });
+    graph.on('node:mouseenter', (evt) => {
+        const { item } = evt;
+        graph.updateItem(item, {
+            style: {
+                ...item.style,
+                lineWidth: 1,
+                stroke: '#1890ff',
+                fill: '#e6f7ff',
+                radius: 2,
+            },
+        });
+    });
+
+    graph.on('node:mouseleave', (evt) => {
+        const { item } = evt;
+        graph.updateItem(item, {
+            style: {
+                ...item.style,
+                lineWidth: 0,
+                fill: '#FFFFFF',
+            },
+        });
+    });
+</script>
+
+<style>
+    body {
+        margin: 0;
+    }
+    .menu {
+        width: 200px;
+        height: 100%;
+        position: absolute;
+        border: 1px solid;
+    }
+    #container {
+        border: 1px solid;
+        margin-left: 200px;
+    }
+    .config-menu {
+        position: absolute;
+        top: 0;
+        right: 0;
+        background-color: #7e7ef214;
+        width: 200px;
+        height: 100%;
+    }
+    .close {
+        position: absolute;
+        top: 50%;
+        left: -12px;
+        cursor: pointer;
+    }
+    .tabs {
+        padding-top: 6px;
+        margin-bottom: 14px;
+    }
+    .tab-body {
+        font-size: 14px;
+        padding: 0 4px;
+    }
+    .tab {
+        border-bottom: 2px solid blue;
+        padding: 5px;
+        cursor: pointer;
+    }
+    .tab:hover {
+        background-color: #d4d4de;
+    }
+    .config-menu {
+        position: fixed;
+        top: 0;
+        right: 0;
+        background-color: #7e7ef214;
+        width: 200px;
+        height: 100%;
+    }
+    .config-row {
+        display: flex;
+    }
+    .config-colon {
+        margin: 0 4px 0 2px;
+        font-weight: 600;
+    }
+</style>

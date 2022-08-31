@@ -1,5 +1,19 @@
 <div class="menu">
-    <div draggable="true" style="height: 200px; background: #eb9521"></div>
+    <div class="collapse">
+        <div class="collapse-header">></div>
+        <span style="position: absolute; top: 3px; right: 7px">input</span>
+        <div class="collapse-body">
+            <div draggable="true">
+                <img src="../menu/input.svg" width="160px" id="input" />
+            </div>
+            <div draggable="true">
+                <img src="../menu/radio.svg" width="120px" id="radio" />
+            </div>
+            <div draggable="true" id="text">
+                <span id="text">文本T</span>
+            </div>
+        </div>
+    </div>
 </div>
 <div id="container" style="width: 1920px; height: 1080px"></div>
 <!-- 侧边配置栏 -->
@@ -8,14 +22,21 @@
         <span>o</span>
     </div>
     <div class="tabs">
-        <span class="tab">styles</span>
+        <span class="tab">config</span>
     </div>
     <div class="tab-body"></div>
 </div>
 <script src="./g6.min.js"></script>
+<script src="./menu/input.js"></script>
+<script src="./menu/radio.js"></script>
+<script src="./menu/text.js"></script>
 <script>
     let dragEvent,
+        focusNode,
         tabBody = document.getElementsByClassName('tab-body')[0];
+    document.addEventListener('keydown', (event) => {
+        event.preventDefault();
+    });
     document.addEventListener(
         'dragstart',
         function (event) {
@@ -47,13 +68,23 @@
                 // 阻止默认动作（如打开一些元素的链接）
                 event.preventDefault();
                 // 将拖动的元素到所选择的放置目标节点中
+
                 graph.addItem('node', {
                     x: targetX,
                     y: targetY,
-                    type: 'input',
-                    config: {
-                        text: '姓名',
-                    },
+                    type: dragEvent.id,
+                    config: window[
+                        dragEvent.id.toLocaleUpperCase() + '_CONFIG'
+                    ],
+                    id: String(Math.random()),
+                });
+                graph.addItem('node', {
+                    x: targetX + 10,
+                    y: targetY + 10,
+                    type: dragEvent.id,
+                    config: window[
+                        dragEvent.id.toLocaleUpperCase() + '_CONFIG'
+                    ],
                     id: String(Math.random()),
                 });
                 console.log(event);
@@ -61,60 +92,23 @@
         },
         false
     );
-    G6.registerNode(
-        'input',
-        {
-            options: {
-                myName: 'Input',
-                size: [270, 40],
-                style: {
-                    stroke: '#FFFFFF',
-                },
-            },
-            afterDraw(cfg, group) {
-                const { config } = cfg;
-                console.log(cfg);
-                group.addShape('text', {
-                    attrs: {
-                        text: config.text,
-                        x: -130,
-                        y: 0,
-                        fontSize: 14,
-                        textAlign: 'left',
-                        textBaseline: 'middle',
-                        fill: '#000000d9',
-                    },
-                    // must be assigned in G6 3.3 and later versions. it can be any value you want
-                    name: 'text-shape',
-                });
-                group.addShape('rect', {
-                    attrs: {
-                        x: -70,
-                        y: -15,
-                        width: 200,
-                        height: 30,
-                        stroke: '#d9d9d9',
-                        radius: [2, 4],
-                    },
-                    // must be assigned in G6 3.3 and later versions. it can be any value you want
-                    name: 'rect-shape',
-                });
-            },
-        },
-        'rect'
-    );
     const data = {
         nodes: [
             {
-                id: 'rect2',
-                label: '',
-                description: 'description, hidden when undefined',
+                id: 'input',
+                description: '单纯的输入框,只携带 placeholder',
                 x: 250,
                 type: 'input',
-                config: {
-                    text: '姓名',
-                },
+                config: INPUT_CONFIG,
                 y: 150,
+            },
+            {
+                id: 'radio',
+                description: '单纯的输入框,只携带 placeholder',
+                x: 170,
+                type: 'radio',
+                config: RADIO_CONFIG,
+                y: 200,
             },
         ],
     };
@@ -143,11 +137,21 @@
 
     graph.data(data);
     graph.render();
+    graph.on('click', (evt) => {
+        const { item } = evt;
+        if (item !== focusNode && focusNode) {
+            unFocus(focusNode);
+            focusNode = null;
+        }
+    });
 
     graph.on('node:click', (evt) => {
         const { item, shape } = evt,
             config = item._cfg.model.config;
+        focus(item); //focus当前节点
+        focusNode = item;
         console.log(item, shape, config);
+        tabBody.replaceChildren();
         for (let [key, value] of Object.entries(config)) {
             let row = document.createElement('div'),
                 keyNative = document.createElement('div'),
@@ -166,37 +170,108 @@
             keyNative.appendChild(new Text(key));
             valueNative.appendChild(new Text(value));
             row.append(keyNative, colon, valueNative);
-            tabBody.replaceChildren(row);
+            tabBody.appendChild(row);
         }
     });
     graph.on('node:mouseenter', (evt) => {
         const { item } = evt;
+        focus(item);
+    });
+
+    graph.on('node:mouseleave', (evt) => {
+        const { item } = evt;
+        if (focusNode !== item) {
+            unFocus(item);
+        }
+    });
+    graph.on('keydown', (evt) => {
+        const { item } = evt;
+        console.log('keyup', evt);
+        if (evt.keyCode === 46) {
+            //delete
+            graph.removeItem(focusNode);
+            focusNode = null;
+        } else if (evt.keyCode >= 37 && evt.keyCode <= 40) {
+            // 左上右下
+            if (focusNode) {
+                let { x, y } = focusNode._cfg.model;
+                switch (evt.keyCode) {
+                    case 37:
+                        x -= 10;
+                        break;
+                    case 38:
+                        y -= 10;
+                        break;
+                    case 39:
+                        x += 10;
+                        break;
+                    case 40:
+                        y += 10;
+                        break;
+                }
+                let model = focusNode._cfg.model;
+                graph.updateItem(focusNode, {
+                    ...model,
+                    x,
+                    y,
+                });
+                evt.preventDefault();
+                evt.stopPropagation();
+                evt.bubbles = false;
+
+                // graph.removeItem(focusNode);
+                // focusNode = graph.addItem('node', {
+                //     ...model,
+                //     x,
+                //     y,
+                // });
+            }
+        }
+    });
+    function focus(item) {
         graph.updateItem(item, {
             style: {
                 ...item.style,
                 lineWidth: 1,
                 stroke: '#1890ff',
-                fill: '#e6f7ff',
+                fill: '#00000000',
                 radius: 2,
             },
         });
-    });
-
-    graph.on('node:mouseleave', (evt) => {
-        const { item } = evt;
+    }
+    function unFocus(item) {
         graph.updateItem(item, {
             style: {
                 ...item.style,
                 lineWidth: 0,
-                fill: '#FFFFFF',
+                fill: '#00000000',
             },
         });
+    }
+</script>
+<script>
+    let collHeader = document.querySelector('.collapse-header'),
+        collBody = document.querySelector('.collapse-body');
+    collHeader.addEventListener('click', () => {
+        if (collBody.style.display !== 'none') {
+            collBody.style.display = 'none';
+        } else {
+            collBody.style.display = 'block';
+        }
     });
 </script>
-
 <style>
+    foreignObject {
+        width: 100%;
+        overflow: inherit;
+    }
     body {
         margin: 0;
+    }
+    .collapse-header {
+        cursor: pointer;
+        background-color: #fafafa;
+        padding: 5px;
     }
     .menu {
         width: 200px;

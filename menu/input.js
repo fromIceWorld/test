@@ -10,8 +10,8 @@ G6.registerNode(
         },
         afterDraw(cfg, group) {
             const { config } = cfg;
-            console.log(cfg);
             group.addShape('text', {
+                id: 'text',
                 attrs: {
                     text: config.placeholder,
                     x: -95,
@@ -36,6 +36,12 @@ G6.registerNode(
                 // must be assigned in G6 3.3 and later versions. it can be any value you want
                 name: 'rect-shape',
             });
+        },
+        afterUpdate(cfg, item) {
+            const { config } = cfg,
+                group = item.getContainer();
+            let text = group.findById('text');
+            text.attr('text', config.placeholder);
         },
     },
     'rect'

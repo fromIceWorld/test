@@ -15,7 +15,6 @@ G6.registerNode(
         },
         afterDraw(cfg, group) {
             const { config } = cfg;
-            console.log(cfg);
             group.addShape('text', {
                 attrs: {
                     x: 2,
@@ -55,5 +54,6 @@ G6.registerNode(
 );
 var RADIO_CONFIG = {
     label: 'A',
+    options: [],
     checked: true,
 };

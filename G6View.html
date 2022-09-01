@@ -3,14 +3,17 @@
         <div class="collapse-header">></div>
         <span style="position: absolute; top: 3px; right: 7px">input</span>
         <div class="collapse-body">
-            <div draggable="true">
+            <div draggable="true" type="node">
                 <img src="../menu/input.svg" width="160px" id="input" />
             </div>
-            <div draggable="true">
+            <div draggable="true" type="node">
                 <img src="../menu/radio.svg" width="120px" id="radio" />
             </div>
-            <div draggable="true" id="text">
+            <div draggable="true" id="text" type="node">
                 <span id="text">文本T</span>
+            </div>
+            <div draggable="true" id="form" type="combo">
+                <span id="text" type="combo">form</span>
             </div>
         </div>
     </div>
@@ -30,17 +33,18 @@
 <script src="./menu/input.js"></script>
 <script src="./menu/radio.js"></script>
 <script src="./menu/text.js"></script>
+<script src="./menu/form/base-form.js"></script>
 <script>
     let dragEvent,
         focusNode,
+        isEdit = false,
         tabBody = document.getElementsByClassName('tab-body')[0];
     document.addEventListener('keydown', (event) => {
-        event.preventDefault();
+        // event.preventDefault();
     });
     document.addEventListener(
         'dragstart',
         function (event) {
-            console.log(event);
             dragEvent = event;
             // 保存拖动元素的引用 (ref.)
             dragEvent = event.target;
@@ -63,31 +67,40 @@
             if (event.target.tagName === 'CANVAS') {
                 let { offsetX, offsetY } = event,
                     targetX = offsetX,
-                    targetY = offsetY;
-                console.log(targetX, targetY);
+                    targetY = offsetY,
+                    targetType = dragEvent.getAttribute('type');
                 // 阻止默认动作（如打开一些元素的链接）
                 event.preventDefault();
                 // 将拖动的元素到所选择的放置目标节点中
-
-                graph.addItem('node', {
-                    x: targetX,
-                    y: targetY,
-                    type: dragEvent.id,
-                    config: window[
-                        dragEvent.id.toLocaleUpperCase() + '_CONFIG'
-                    ],
-                    id: String(Math.random()),
-                });
-                graph.addItem('node', {
-                    x: targetX + 10,
-                    y: targetY + 10,
-                    type: dragEvent.id,
-                    config: window[
-                        dragEvent.id.toLocaleUpperCase() + '_CONFIG'
-                    ],
-                    id: String(Math.random()),
-                });
-                console.log(event);
+                if (targetType === 'combo') {
+                    graph.createCombo(
+                        {
+                            x: targetX,
+                            y: targetY,
+                            type: 'form',
+                            id: String(Math.random()),
+                            padding: [5, 5, 5, 5],
+                            size: [260, 50],
+                            label: 'form',
+                            labelCfg: {
+                                refX: -1,
+                                refY: -11,
+                            },
+                            style: {},
+                        },
+                        []
+                    );
+                } else if (targetType === 'node') {
+                    graph.addItem('node', {
+                        x: targetX,
+                        y: targetY,
+                        type: dragEvent.id,
+                        config: window[
+                            dragEvent.id.toLocaleUpperCase() + '_CONFIG'
+                        ],
+                        id: String(Math.random()),
+                    });
+                }
             }
         },
         false
@@ -103,18 +116,67 @@
                 y: 150,
             },
             {
-                id: 'radio',
-                description: '单纯的输入框,只携带 placeholder',
+                id: 'text',
+                description: '文字',
                 x: 170,
-                type: 'radio',
-                config: RADIO_CONFIG,
+                type: 'text',
+                config: TEXT_CONFIG,
                 y: 200,
             },
         ],
     };
-
     const width = document.getElementById('container').scrollWidth;
     const height = document.getElementById('container').scrollHeight || 500;
+    G6.registerCombo(
+        'cRect',
+        {
+            drawShape: function drawShape(cfg, group) {
+                const self = this;
+                // 获取配置中的 Combo 内边距
+                cfg.padding = cfg.padding || [50, 20, 20, 20];
+                // 获取样式配置，style.width 与 style.height 对应 rect Combo 位置说明图中的 width 与 height
+                // const style = self.getShapeStyle(cfg);
+                const style = { width: 1200, height: 1200 };
+                // 绘制一个矩形作为 keyShape，与 'rect' Combo 的 keyShape 一致
+                const rect = (comboShape = group.addShape('rect', {
+                    attrs: {
+                        ...style,
+                        x:
+                            -style.width / 2 -
+                            (cfg.padding[3] - cfg.padding[1]) / 2,
+                        y:
+                            -style.height / 2 -
+                            (cfg.padding[0] - cfg.padding[2]) / 2,
+                        width: style.width,
+                        height: style.height,
+                    },
+                    draggable: true,
+                    name: 'combo-keyShape',
+                }));
+                // 增加右侧圆
+                group.addShape('circle', {
+                    attrs: {
+                        ...style,
+                        fill: '#fff',
+                        opacity: 1,
+                        // cfg.style.width 与 cfg.style.heigth 对应 rect Combo 位置说明图中的 innerWdth 与 innerHeight
+                        x: cfg.style.width / 2 + cfg.padding[1],
+                        y: (cfg.padding[2] - cfg.padding[0]) / 2,
+                        r: 5,
+                    },
+                    draggable: true,
+                    name: 'combo-circle-shape',
+                });
+                return rect;
+            },
+            afterDraw() {},
+            // 定义新增的右侧圆的位置更新逻辑
+            afterUpdate: function afterUpdate(cfg, combo) {
+                console.log('自定义combo');
+            },
+        },
+        'rect'
+    );
     const graph = new G6.Graph({
         container: 'container',
         width,
@@ -124,7 +186,7 @@
             type: 'modelRect',
         },
         modes: {
-            default: ['drag-node'],
+            default: ['drag-node', 'drag-combo'],
         },
         nodeStateStyles: {
             hover: {
@@ -133,13 +195,34 @@
                 fill: '#e6f7ff',
             },
         },
+        defaultCombo: {
+            type: 'rect', // Combo 类型
+            // ... 其他配置
+        },
     });
 
     graph.data(data);
     graph.render();
+    graph.createCombo(
+        {
+            type: 'form',
+            id: 'combo1',
+            padding: [5, 5, 5, 5],
+            size: [260, 50],
+            label: 'form',
+            labelCfg: {
+                refX: -1,
+                refY: -11,
+            },
+            style: {},
+        },
+        ['input', 'text']
+    );
+
     graph.on('click', (evt) => {
         const { item } = evt;
         if (item !== focusNode && focusNode) {
+            tabBody.replaceChildren();
             unFocus(focusNode);
             focusNode = null;
         }
@@ -147,10 +230,10 @@
 
     graph.on('node:click', (evt) => {
         const { item, shape } = evt,
+            model = item._cfg.model,
             config = item._cfg.model.config;
         focus(item); //focus当前节点
         focusNode = item;
-        console.log(item, shape, config);
         tabBody.replaceChildren();
         for (let [key, value] of Object.entries(config)) {
             let row = document.createElement('div'),
@@ -163,15 +246,31 @@
             keyNative.setAttribute('class', 'style-key');
             valueNative.setAttribute('class', 'style-value');
             valueNative.setAttribute('contenteditable', 'true');
+            valueNative.addEventListener('focus', (e) => {
+                isEdit = true;
+            });
             valueNative.addEventListener('blur', (e) => {
-                shape.attr(key, valueNative.childNodes[0].nodeValue);
+                isEdit = false;
                 config[key] = valueNative.childNodes[0].nodeValue;
+                // graph.removeItem(focusNode);
+                // focusNode = graph.addItem('node', {
+                //     ...model,
+                // });
+                // focus(
+                //     graph.updateItem(focusNode, {
+                //         ...model,
+                //         x: 500,
+                //     })
+                // );
             });
             keyNative.appendChild(new Text(key));
             valueNative.appendChild(new Text(value));
             row.append(keyNative, colon, valueNative);
             tabBody.appendChild(row);
         }
+    });
+    graph.on('combo:click', (evt) => {
+        console.log(evt);
     });
     graph.on('node:mouseenter', (evt) => {
         const { item } = evt;
@@ -185,8 +284,10 @@
         }
     });
     graph.on('keydown', (evt) => {
+        if (isEdit) {
+            return;
+        }
         const { item } = evt;
-        console.log('keyup', evt);
         if (evt.keyCode === 46) {
             //delete
             graph.removeItem(focusNode);
@@ -210,21 +311,12 @@
                         break;
                 }
                 let model = focusNode._cfg.model;
-                graph.updateItem(focusNode, {
-                    ...model,
+                focusNode.updatePosition({
                     x,
                     y,
                 });
                 evt.preventDefault();
                 evt.stopPropagation();
-                evt.bubbles = false;
-
-                // graph.removeItem(focusNode);
-                // focusNode = graph.addItem('node', {
-                //     ...model,
-                //     x,
-                //     y,
-                // });
             }
         }
     });
@@ -261,6 +353,34 @@
     });
 </script>
 <style>
+    .collapse-body > div {
+        margin: 6px 0;
+    }
+    /* 整个滚动条 */
+    ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+        background-color: #ffffff;
+        /* display: none; */
+    }
+
+    /* 鼠标指针浮动显示 */
+    :hover::-webkit-scrollbar {
+        display: block;
+    }
+
+    /* 滚动条轨道 */
+    ::-webkit-scrollbar-track {
+        /* 阴影 */
+        -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+        background-color: #ffffff;
+    }
+
+    /* 滚定条滑块 */
+    ::-webkit-scrollbar-thumb {
+        border-radius: 30px;
+        background-color: #615b5b49;
+    }
     foreignObject {
         width: 100%;
         overflow: inherit;
@@ -274,13 +394,15 @@
         padding: 5px;
     }
     .menu {
-        width: 200px;
-        height: 100%;
+        width: 194px;
         position: absolute;
-        border: 1px solid;
+        border: 1px solid #615b5b49;
+        border-bottom: none;
+        border-right: none;
+        padding: 2px;
     }
     #container {
-        border: 1px solid;
+        border: 1px solid #615b5b49;
         margin-left: 200px;
     }
     .config-menu {

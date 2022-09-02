@@ -1,19 +1,38 @@
 <div class="menu">
     <div class="collapse">
         <div class="collapse-header">></div>
-        <span style="position: absolute; top: 3px; right: 7px">input</span>
         <div class="collapse-body">
-            <div draggable="true" type="node">
-                <img src="../menu/input.svg" width="160px" id="input" />
+            <div draggable="true">
+                <img
+                    src="../menu/input.svg"
+                    width="20px"
+                    id="input"
+                    type="node"
+                />
             </div>
-            <div draggable="true" type="node">
-                <img src="../menu/radio.svg" width="120px" id="radio" />
+            <div draggable="true">
+                <img
+                    src="../menu/radio.svg"
+                    width="20px"
+                    id="radio"
+                    type="node"
+                />
             </div>
-            <div draggable="true" id="text" type="node">
-                <span id="text">文本T</span>
+            <div draggable="true" id="text">
+                <img
+                    src="../menu/text.svg"
+                    width="20px"
+                    id="text"
+                    type="node"
+                />
             </div>
-            <div draggable="true" id="form" type="combo">
-                <span id="text" type="combo">form</span>
+            <div draggable="true" id="form">
+                <img
+                    src="../menu/form.svg"
+                    width="20px"
+                    id="form"
+                    type="combo"
+                />
             </div>
         </div>
     </div>
@@ -30,6 +49,7 @@
     <div class="tab-body"></div>
 </div>
 <script src="./g6.min.js"></script>
+<script src="./common//index.js"></script>
 <script src="./menu/input.js"></script>
 <script src="./menu/radio.js"></script>
 <script src="./menu/text.js"></script>
@@ -95,9 +115,7 @@
                         x: targetX,
                         y: targetY,
                         type: dragEvent.id,
-                        config: window[
-                            dragEvent.id.toLocaleUpperCase() + '_CONFIG'
-                        ],
+                        ...window[dragEvent.id.toLocaleUpperCase() + '_CONFIG'],
                         id: String(Math.random()),
                     });
                 }
@@ -112,7 +130,7 @@
                 description: '单纯的输入框,只携带 placeholder',
                 x: 250,
                 type: 'input',
-                config: INPUT_CONFIG,
+                ...INPUT_CONFIG,
                 y: 150,
             },
             {
@@ -120,63 +138,13 @@
                 description: '文字',
                 x: 170,
                 type: 'text',
-                config: TEXT_CONFIG,
+                ...TEXT_CONFIG,
                 y: 200,
             },
         ],
     };
     const width = document.getElementById('container').scrollWidth;
     const height = document.getElementById('container').scrollHeight || 500;
-    G6.registerCombo(
-        'cRect',
-        {
-            drawShape: function drawShape(cfg, group) {
-                const self = this;
-                // 获取配置中的 Combo 内边距
-                cfg.padding = cfg.padding || [50, 20, 20, 20];
-                // 获取样式配置，style.width 与 style.height 对应 rect Combo 位置说明图中的 width 与 height
-                // const style = self.getShapeStyle(cfg);
-                const style = { width: 1200, height: 1200 };
-                // 绘制一个矩形作为 keyShape，与 'rect' Combo 的 keyShape 一致
-                const rect = (comboShape = group.addShape('rect', {
-                    attrs: {
-                        ...style,
-                        x:
-                            -style.width / 2 -
-                            (cfg.padding[3] - cfg.padding[1]) / 2,
-                        y:
-                            -style.height / 2 -
-                            (cfg.padding[0] - cfg.padding[2]) / 2,
-                        width: style.width,
-                        height: style.height,
-                    },
-                    draggable: true,
-                    name: 'combo-keyShape',
-                }));
-                // 增加右侧圆
-                group.addShape('circle', {
-                    attrs: {
-                        ...style,
-                        fill: '#fff',
-                        opacity: 1,
-                        // cfg.style.width 与 cfg.style.heigth 对应 rect Combo 位置说明图中的 innerWdth 与 innerHeight
-                        x: cfg.style.width / 2 + cfg.padding[1],
-                        y: (cfg.padding[2] - cfg.padding[0]) / 2,
-                        r: 5,
-                    },
-                    draggable: true,
-                    name: 'combo-circle-shape',
-                });
-                return rect;
-            },
-            afterDraw() {},
-            // 定义新增的右侧圆的位置更新逻辑
-            afterUpdate: function afterUpdate(cfg, combo) {
-                console.log('自定义combo');
-            },
-        },
-        'rect'
-    );
     const graph = new G6.Graph({
         container: 'container',
         width,
@@ -231,11 +199,14 @@
     graph.on('node:click', (evt) => {
         const { item, shape } = evt,
             model = item._cfg.model,
-            config = item._cfg.model.config;
+            comboId = model.comboId,
+            json = item._cfg.model.json;
+        console.log(model.comboId);
+
         focus(item); //focus当前节点
         focusNode = item;
         tabBody.replaceChildren();
-        for (let [key, value] of Object.entries(config)) {
+        for (let [key, value] of Object.entries(json)) {
             let row = document.createElement('div'),
                 keyNative = document.createElement('div'),
                 colon = document.createElement('span'),
@@ -251,17 +222,27 @@
             });
             valueNative.addEventListener('blur', (e) => {
                 isEdit = false;
-                config[key] = valueNative.childNodes[0].nodeValue;
-                // graph.removeItem(focusNode);
-                // focusNode = graph.addItem('node', {
-                //     ...model,
-                // });
-                // focus(
-                //     graph.updateItem(focusNode, {
-                //         ...model,
-                //         x: 500,
-                //     })
-                // );
+                json[key] = Array.from(valueNative.childNodes)
+                    .map((text) => text.nodeValue)
+                    .join('');
+                let targetCombo = graph.findById(comboId),
+                    newNode,
+                    newWidth;
+                newNode = graph.addItem('node', {
+                    ...model,
+                    id: String(Math.random()),
+                });
+                graph.removeItem(focusNode);
+                if (targetCombo) {
+                    targetCombo.addNode(newNode);
+                }
+                focusNode = newNode;
+
+                newWidth = model.getWidth();
+                // 更新节点的
+                focusNode.update({
+                    size: newWidth,
+                });
             });
             keyNative.appendChild(new Text(key));
             valueNative.appendChild(new Text(value));
@@ -353,6 +334,16 @@
     });
 </script>
 <style>
+    [contenteditable] {
+        width: 100%;
+    }
+    [draggable] {
+        cursor: pointer;
+        display: inline-block;
+    }
+    [draggable] > img {
+        padding: 5px;
+    }
     .collapse-body > div {
         margin: 6px 0;
     }

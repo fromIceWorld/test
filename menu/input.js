@@ -9,11 +9,12 @@ G6.registerNode(
             },
         },
         afterDraw(cfg, group) {
-            const { config } = cfg;
+            const { json } = cfg,
+                { placeholder } = json;
             group.addShape('text', {
                 id: 'text',
                 attrs: {
-                    text: config.placeholder,
+                    text: placeholder,
                     x: -95,
                     y: 2,
                     fontSize: 14,
@@ -38,14 +39,14 @@ G6.registerNode(
             });
         },
         afterUpdate(cfg, item) {
-            const { config } = cfg,
-                group = item.getContainer();
-            let text = group.findById('text');
-            text.attr('text', config.placeholder);
+            // const { config } = cfg,
+            //     group = item.getContainer();
+            // let text = group.findById('text');
+            // text.attr('text', config.placeholder);
         },
     },
     'rect'
 );
 var INPUT_CONFIG = {
-    placeholder: '请输入',
+    json: { placeholder: '请输入' },
 };

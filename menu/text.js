@@ -9,11 +9,12 @@ G6.registerNode(
             },
         },
         afterDraw(cfg, group) {
-            const { config } = cfg;
+            const { json } = cfg,
+                { text } = json;
             group.addShape('text', {
                 id: 'text',
                 attrs: {
-                    text: config.text,
+                    text: text,
                     x: -95,
                     y: 2,
                     fontSize: 14,
@@ -26,14 +27,23 @@ G6.registerNode(
             });
         },
         afterUpdate(cfg, item) {
-            const { config } = cfg,
+            const { json } = cfg,
+                { text } = json,
                 group = item.getContainer();
-            let text = group.findById('text');
-            text.attr('text', config.text);
+            let textShape = group.findById('text');
+            textShape.attr('text', text);
         },
     },
     'rect'
 );
 var TEXT_CONFIG = {
-    text: '...',
+    json: {
+        text: '...',
+    },
+    getWidth() {
+        return {
+            x: 100,
+            y: 100,
+        };
+    },
 };

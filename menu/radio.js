@@ -32,7 +32,7 @@ function renderRadio(group, json, getWidth) {
         group.addShape('text', {
             id: item.value,
             attrs: {
-                x: 15 + index * 40 + preWidth - width / 2,
+                x: 30 + index * 30 + preWidth - width / 2,
                 y: 2,
                 text: item.label,
                 fontSize: 14,
@@ -46,7 +46,7 @@ function renderRadio(group, json, getWidth) {
         if (item.checked) {
             group.addShape('circle', {
                 attrs: {
-                    x: index * 40 + preWidth - width / 2,
+                    x: 15 + index * 30 + preWidth - width / 2,
                     y: 0,
                     r: 4,
                     fill: item.checked ? innerChecedFill : outerChecedFill,
@@ -57,7 +57,7 @@ function renderRadio(group, json, getWidth) {
         }
         group.addShape('circle', {
             attrs: {
-                x: index * 40 + preWidth - width / 2,
+                x: 15 + index * 30 + preWidth - width / 2,
                 y: 0,
                 r: 7,
                 stroke: item.checked ? '#1890ff' : '#d9d9d9',

@@ -26,12 +26,19 @@ G6.registerNode(
                 name: 'text-shape',
             });
         },
-        afterUpdate(cfg, item) {
+        update(cfg, node) {
             const { json } = cfg,
                 { text } = json,
-                group = item.getContainer();
+                group = node.getContainer();
             let textShape = group.findById('text');
             textShape.attr('text', text);
+        },
+        afterUpdate(cfg, item) {
+            // const { json } = cfg,
+            //     { text } = json,
+            //     group = item.getContainer();
+            // let textShape = group.findById('text');
+            // textShape.attr('text', text);
         },
     },
     'rect'
@@ -41,9 +48,6 @@ var TEXT_CONFIG = {
         text: '...',
     },
     getWidth() {
-        return {
-            x: 100,
-            y: 100,
-        };
+        return [300, 100];
     },
 };

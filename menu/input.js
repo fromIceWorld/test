@@ -38,6 +38,13 @@ G6.registerNode(
                 name: 'rect-shape',
             });
         },
+        update(cfg, node) {
+            const { json } = cfg,
+                { placeholder } = json,
+                group = node.getContainer();
+            let textShape = group.findById('text');
+            textShape.attr('text', placeholder);
+        },
         afterUpdate(cfg, item) {
             // const { config } = cfg,
             //     group = item.getContainer();
@@ -49,4 +56,7 @@ G6.registerNode(
 );
 var INPUT_CONFIG = {
     json: { placeholder: '请输入' },
+    getWidth() {
+        return [210, 40];
+    },
 };

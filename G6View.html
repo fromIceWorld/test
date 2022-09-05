@@ -157,10 +157,9 @@
             default: ['drag-node', 'drag-combo'],
         },
         nodeStateStyles: {
-            hover: {
-                lineWidth: 2,
+            focus: {
+                lineWidth: 1,
                 stroke: '#1890ff',
-                fill: '#e6f7ff',
             },
         },
         defaultCombo: {
@@ -199,6 +198,7 @@
     graph.on('node:click', (evt) => {
         const { item, shape } = evt,
             model = item._cfg.model,
+            getWidth = model.getWidth,
             comboId = model.comboId,
             json = item._cfg.model.json;
         console.log(model.comboId);
@@ -221,28 +221,35 @@
                 isEdit = true;
             });
             valueNative.addEventListener('blur', (e) => {
-                isEdit = false;
+                console.log(model);
                 json[key] = Array.from(valueNative.childNodes)
                     .map((text) => text.nodeValue)
                     .join('');
-                let targetCombo = graph.findById(comboId),
-                    newNode,
-                    newWidth;
-                newNode = graph.addItem('node', {
+                graph.updateItem(focusNode, {
                     ...model,
-                    id: String(Math.random()),
                 });
-                graph.removeItem(focusNode);
-                if (targetCombo) {
-                    targetCombo.addNode(newNode);
-                }
-                focusNode = newNode;
+                // isEdit = false;
+                // json[key] = Array.from(valueNative.childNodes)
+                //     .map((text) => text.nodeValue)
+                //     .join('');
+                // let targetCombo = graph.findById(comboId),
+                //     newNode,
+                //     newWidth;
+                // newNode = graph.addItem('node', {
+                //     ...model,
+                //     id: String(Math.random()),
+                // });
+                // graph.removeItem(focusNode);
+                // if (targetCombo) {
+                //     targetCombo.addNode(newNode);
+                // }
+                // focusNode = newNode;
 
-                newWidth = model.getWidth();
-                // 更新节点的
-                focusNode.update({
-                    size: newWidth,
-                });
+                // newWidth = getWidth();
+                // // // 更新节点的
+                // newNode.update({
+                //     size: [50, 50],
+                // });
             });
             keyNative.appendChild(new Text(key));
             valueNative.appendChild(new Text(value));
@@ -302,24 +309,10 @@
         }
     });
     function focus(item) {
-        graph.updateItem(item, {
-            style: {
-                ...item.style,
-                lineWidth: 1,
-                stroke: '#1890ff',
-                fill: '#00000000',
-                radius: 2,
-            },
-        });
+        graph.setItemState(item, 'focus', true);
     }
     function unFocus(item) {
-        graph.updateItem(item, {
-            style: {
-                ...item.style,
-                lineWidth: 0,
-                fill: '#00000000',
-            },
-        });
+        graph.setItemState(item, 'focus', false);
     }
 </script>
 <script>

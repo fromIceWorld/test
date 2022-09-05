@@ -1,6 +1,6 @@
-var FORM_CONFIG = {};
+var COMBINATION_CONFIG = {};
 G6.registerCombo(
-    'form',
+    'combination',
     {
         drawShape: function drawShape(cfg, group) {
             const self = this;

@@ -57,7 +57,6 @@ G6.registerNode(
 );
 function renderRadio(group, json, destroy) {
     if (destroy) {
-        // group.clear();
         shapes.forEach((shapoe) => {
             group.removeChild(shapoe);
         });
@@ -76,8 +75,7 @@ function renderRadio(group, json, destroy) {
                 textBaseline: 'middle',
                 fill: '#000000d9',
             },
-            // must be assigned in G6 3.3 and later versions. it can be any value you want
-            name: item.label + '_label',
+            name: item.label + '_label' + Math.random(),
         });
         if (item.checked) {
             let circleInner = group.addShape('circle', {
@@ -88,7 +86,7 @@ function renderRadio(group, json, destroy) {
                     fill: item.checked ? innerChecedFill : outerChecedFill,
                 },
                 // must be assigned in G6 3.3 and later versions. it can be any value you want
-                name: item.label + '_inner-circle',
+                name: item.label + '_inner-circle' + Math.random(),
             });
             shapes.push(circleInner);
         }
@@ -100,12 +98,11 @@ function renderRadio(group, json, destroy) {
                 stroke: item.checked ? '#1890ff' : '#d9d9d9',
             },
             // must be assigned in G6 3.3 and later versions. it can be any value you want
-            name: item.label + '_outer-circle',
+            name: item.label + '_outer-circle' + Math.random(),
         });
         shapes.push(text, circleOuter);
         return preWidth + 30 + measureText(item.label);
     }, 5);
-    console.log(width, height, result);
     rect.attr({
         width: result,
         height: 40,

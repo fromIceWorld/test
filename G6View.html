@@ -34,10 +34,18 @@
                     type="combo"
                 />
             </div>
+            <div draggable="true" id="form">
+                <img
+                    src="../menu/combination.svg"
+                    width="20px"
+                    id="combination"
+                    type="combo"
+                />
+            </div>
         </div>
     </div>
 </div>
-<div id="container" style="width: 1920px; height: 1080px"></div>
+<div id="drawing-board" style="width: 1920px; height: 1080px"></div>
 <!-- 侧边配置栏 -->
 <div class="config-menu">
     <div class="close">
@@ -54,6 +62,8 @@
 <script src="./menu/radio.js"></script>
 <script src="./menu/text.js"></script>
 <script src="./menu/form/base-form.js"></script>
+<script src="./menu/container//base/index.js"></script>
+<script src="./mouse-menu//right-menu/index.js"></script>
 <script>
     let dragEvent,
         focusNode,
@@ -86,6 +96,7 @@
         function (event) {
             if (event.target.tagName === 'CANVAS') {
                 let { offsetX, offsetY } = event,
+                    { id } = dragEvent,
                     targetX = offsetX,
                     targetY = offsetY,
                     targetType = dragEvent.getAttribute('type');
@@ -97,11 +108,11 @@
                         {
                             x: targetX,
                             y: targetY,
-                            type: 'form',
+                            type: id,
                             id: String(Math.random()),
                             padding: [5, 5, 5, 5],
                             size: [260, 50],
-                            label: 'form',
+                            label: id,
                             labelCfg: {
                                 refX: -1,
                                 refY: -11,
@@ -143,10 +154,10 @@
             },
         ],
     };
-    const width = document.getElementById('container').scrollWidth;
-    const height = document.getElementById('container').scrollHeight || 500;
+    const width = document.getElementById('drawing-board').scrollWidth;
+    const height = document.getElementById('drawing-board').scrollHeight || 500;
     const graph = new G6.Graph({
-        container: 'container',
+        container: 'drawing-board',
         width,
         height,
         // translate the graph to align the canvas's center, support by v3.5.1
@@ -166,6 +177,7 @@
             type: 'rect', // Combo 类型
             // ... 其他配置
         },
+        plugins: [rightMenu],
     });
 
     graph.data(data);
@@ -194,7 +206,6 @@
             focusNode = null;
         }
     });
-
     graph.on('node:click', (evt) => {
         const { item, shape } = evt,
             model = item._cfg.model,
@@ -327,6 +338,19 @@
     });
 </script>
 <style>
+    .g6-component-contextmenu {
+        font-size: 14px;
+        padding: 0;
+    }
+    .g6-component-contextmenu > div {
+        cursor: pointer;
+    }
+    .g6-component-contextmenu > ul {
+        margin: 1px;
+    }
+    .g6-component-contextmenu p:hover {
+        color: #00af1ccf;
+    }
     [contenteditable] {
         width: 100%;
     }
@@ -385,7 +409,7 @@
         border-right: none;
         padding: 2px;
     }
-    #container {
+    #drawing-board {
         border: 1px solid #615b5b49;
         margin-left: 200px;
     }

@@ -10,6 +10,7 @@ import { bIf } from './if';
 import { MyComponent } from './myComponent';
 import { RouterModule } from './routerModule/index';
 import { Router } from './routerModule/router';
+import { TabComponent } from './tabs';
 import { TestComponent } from './test';
 const routes = [
     {
@@ -45,6 +46,7 @@ const routes = [
         IronComponent,
         SpiderComponent,
         Spider2Component,
+        TabComponent,
     ],
     providers: [{ provide: Router, useClass: Router, deps: [] }],
     imports: [RouterModule.forRoot(routes), formsModule],

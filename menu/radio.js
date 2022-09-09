@@ -15,7 +15,7 @@ G6.registerNode(
                 fill: '#00000000',
             },
         },
-        drawShape: function drawShape(cfg, group) {
+        drawShape: function (cfg, group) {
             const self = this;
             // 获取配置中的 Combo 内边距
             cfg.padding = [5, 5, 5, 5];

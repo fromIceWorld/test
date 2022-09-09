@@ -16,8 +16,8 @@ G6.registerCombo(
                     y:
                         -style.height / 2 -
                         (cfg.padding[0] - cfg.padding[2]) / 2,
-                    width: style.width,
-                    height: style.height,
+                    // width: style.width,
+                    // height: style.height,
                 },
                 draggable: true,
                 name: 'combo-keyShape',

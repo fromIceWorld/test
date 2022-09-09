@@ -1,115 +1,163 @@
-import {
-    CheckDetectChange,
-    Component,
-    formControl,
-    formGroup,
-    Inject,
-} from 'my-world';
+import { CheckDetectChange, Component, Inject, ViewChild } from 'my-world';
 
 @Component({
     selector: `#root`,
     styles: ``,
     template: `
-    <form &formGroup="myForm">
-        <span>姓名：</span><input formControlName="name"></input>|<span>{{myForm.fromControls.name.config.value}}</span><br></br>
-        <span>性别：</span><input formControlName="sex"></input>
-    </form>
-        <textarea %="exp2" ></textarea>
-        <text %="exp" ></text>
-        <input %="exp2"></input>
-        <input id="orange" type="checkbox" %="checkboxData" value="橘子" label="第一个checkbox"></input>
-        <label for="orange">橘子</label>
-        <input id="apple" type="checkbox" value="苹果" %="checkboxData" label="第一个checkbox"></input>
-        <label for="apple">苹果</label>
-        ||checkbox值: {{checkboxData}} ||
-        <select %="selectDrop">
-            <option>A</option>
-            <option>B</option>
-            <option>C</option>
-        </select>
-        ||select值: {{selectDrop}} ||
-
-        <select multiple %="mulSelectData" size="4">
-            <option>AA</option>
-            <option>BB</option>
-            <option>CC</option>
-            <option>DD</option>
-        </select>
-        ||  mulSelect值:  {{mulSelectData}} ||
-            <input id="radio" type="radio" value="少年" %="selectRadio" name="Radio"></input>
-            <label for="radio">少年</label>
-            <input id="radio2" type="radio" value="青年" %="selectRadio"  name="Radio"></input>
-            <label for="radio2">青年</label>
-            ||  radio值:  {{selectRadio}}||
-       
-        <div
-            data-angular
-            name="angular"
-            &style="{width: dataWidth}"
-            @change="go($event,'query')"
-        >
-            文本节点:【文本】
-            <div
-                *if="displayIf"
-                style="width: 100px;height: 100px;background-color:#b52f4a;"
-                &style="{width: dataWidth}"
-                &name="block"
-                @click="emit($event,123)"
-            >
-                {{ displayIf }}
+        <div class="menu">
+            <div class="collapse">
+                <div class="collapse-header" @click="changeCollapse($event)">> form</div>
+                    <div *if="coll">
+                        <div draggable="true" *forOf="collapses" >
+                            <img
+                                &src="item.img"
+                                width="20px"
+                                &id="item.id"
+                                &type="item.type"
+                                ></img>
+                        </div>
+                    </div>
             </div>
         </div>
-        <p
-            #ref
-            class="forP bindClass2"
-            &class="{bindClass1: class1,bindClass2: class2}"
-        >
-            我是:{{ exp }},{{ exp2 }}
-        </p>
-        <app-child &value="block" @childEmit="console($event)">
-            <span>default slot</span>
-            <span slot="slot1">slot1</span>
-        </app-child>
-        <!-- 注释信息-->
-        <h3 style="background:yellow">下面是路由：</h3>
-        <h1>路由跳转:</h1>
-        <router-link
-            to="file:///C:/Users/%E5%B4%94%E5%86%B0%E5%86%B0/Desktop/test/index.html#/iron/mark5"
-            >GO!钢铁侠实验室</router-link
-        >
-        <div></div>
-        <router-link
-            to="file:///C:/Users/%E5%B4%94%E5%86%B0%E5%86%B0/Desktop/test/index.html#/spider/mark5"
-            >GO!蜘蛛侠家</router-link
-        >
-        <router-view></router-view>
+        <div id="drawing-board" #drawing-board style="width: 1920px; height: 1080px"></div>
+        <!-- 侧边配置栏 -->
+        <div class="config-menu">
+            <div class="close">
+                <span>o</span>
+            </div>
+            <div class="tabs">
+                <app-tab 
+                    &config="config" 
+                    @updateJSON="updateNode($event)" 
+                    @changeLayout="changeNodeLayout($event)"
+                    @editEvent="onEdit($event)">
+                </app-tab>
+            </div>
+        </div>
     `,
 })
 class MyComponent {
-    exp = '第一个插值';
-    displayIf: boolean = true;
-    exp2 = '第2个插值';
-    block = 'com';
-    dataWidth = '200px';
-    class1 = true;
-    class2 = false;
-    selectRadio = '少年';
-    selectDrop = ['C'];
-    checkboxData = ['苹果'];
-    mulSelectData = ['BB'];
-    myForm = new formGroup({
-        name: new formControl({ value: '绿巨人' }),
-        sex: new formControl({ value: '男' }),
-    });
+    @ViewChild('drawing-board')
+    board;
+    dragTarget: EventTarget | null = null;
+    data = {
+        nodes: [
+            {
+                id: 'input',
+                description: '单纯的输入框,只携带 placeholder',
+                x: 250,
+                type: 'input',
+                ...INPUT_CONFIG,
+                y: 150,
+            },
+            {
+                id: 'text',
+                description: '文字',
+                x: 170,
+                type: 'text',
+                ...TEXT_CONFIG,
+                y: 200,
+            },
+        ],
+    };
+    graph: any;
+    focusNode: any = null;
+    jsonOnEdit: boolean = false;
+    coll: boolean = true;
+    config = [];
+    collapses = [
+        {
+            id: 'input',
+            type: 'node',
+            img: '../menu/input.svg',
+        },
+        {
+            id: 'radio',
+            type: 'node',
+            img: '../menu/radio.svg',
+        },
+        {
+            id: 'text',
+            type: 'node',
+            img: '../menu/text.svg',
+        },
+        {
+            id: 'form',
+            type: 'combo',
+            img: '../menu/form.svg',
+        },
+        {
+            id: 'combination',
+            type: 'combo',
+            img: '../menu/combination.svg',
+        },
+    ];
     constructor(@Inject(CheckDetectChange) private cd: CheckDetectChange) {}
 
     emit(e: EventTarget, value: any) {
         console.log(e, value, this);
     }
-
+    onEdit(e) {
+        let { detail } = e,
+            { dom, value } = detail;
+        console.log('编辑状态', value);
+        this.jsonOnEdit = value;
+    }
+    changeNodeLayout(e) {
+        console.log(e);
+    }
+    updateNode(e) {
+        const model = this.focusNode._cfg.model,
+            getWidth = model.getWidth,
+            comboId = model.comboId,
+            json = this.focusNode._cfg.model.json;
+        let { detail } = e,
+            { dom, value } = detail;
+        console.log(dom, value);
+        Object.assign(json, value);
+        this.graph.updateItem(this.focusNode, {
+            ...model,
+        });
+    }
     OnInit() {
         console.log('%cmyComponent: %cOnInit', 'color:green', 'color:blue');
-        console.log(this.router);
+        this.addGlobalEvent();
+        this.initBoard();
+    }
+    changeCollapse(e) {
+        this.coll = !this.coll;
+        this.cd.detectChanges();
+    }
+    initBoard() {
+        const width = this.board.scrollWidth,
+            height = this.board.scrollHeight || 500,
+            graph = new G6.Graph({
+                container: 'drawing-board',
+                width,
+                height,
+                // translate the graph to align the canvas's center, support by v3.5.1
+                defaultNode: {
+                    type: 'modelRect',
+                },
+                modes: {
+                    default: ['drag-node', 'drag-combo'],
+                },
+                nodeStateStyles: {
+                    focus: {
+                        lineWidth: 1,
+                        stroke: '#1890ff',
+                    },
+                },
+                defaultCombo: {
+                    type: 'rect', // Combo 类型
+                    // ... 其他配置
+                },
+                plugins: [rightMenu],
+            });
+        this.graph = graph;
+        graph.data(this.data);
+        graph.render();
+        this.graphAddEventListener();
     }
     OnInputChanges(changesObj: any) {
         console.log(
@@ -134,6 +182,158 @@ class MyComponent {
             '%cmyComponent: %OnViewUpdated',
             'color:green',
             'color:#ff6500'
+        );
+    }
+    focus(item) {
+        this.graph.setItemState(item, 'focus', true);
+    }
+    unFocus(item) {
+        if (!item) {
+            return;
+        }
+        this.graph.setItemState(item, 'focus', false);
+    }
+    graphAddEventListener() {
+        const graph = this.graph;
+        graph.on('click', (evt) => {
+            const { item } = evt;
+            if (item !== this.focusNode) {
+                if (this.focusNode) {
+                    this.unFocus(this.focusNode);
+                    this.focusNode = null;
+                } else {
+                    this.config = [];
+                    this.cd.detectChanges();
+                }
+            }
+        });
+        graph.on('node:click', (evt) => {
+            const { item, shape } = evt,
+                model = item._cfg.model,
+                getWidth = model.getWidth,
+                comboId = model.comboId,
+                json = item._cfg.model.json;
+            console.log(model.comboId);
+            this.unFocus(this.focusNode);
+            this.focus(item); //focus当前节点
+            this.focusNode = item;
+            this.config = [model.json];
+            this.cd.detectChanges();
+        });
+        graph.on('combo:click', (evt) => {
+            console.log(evt);
+        });
+        graph.on('node:mouseenter', (evt) => {
+            const { item } = evt;
+            this.focus(item);
+        });
+
+        graph.on('node:mouseleave', (evt) => {
+            const { item } = evt;
+            if (this.focusNode !== item) {
+                this.unFocus(item);
+            }
+        });
+        graph.on('keydown', (evt: any) => {
+            if (this.jsonOnEdit) {
+                return;
+            }
+            const { item, keyCode } = evt;
+            if (keyCode === 46) {
+                //delete
+                graph.removeItem(this.focusNode);
+                this.focusNode = null;
+            } else if (keyCode >= 37 && keyCode <= 40) {
+                // 左上右下
+                if (this.focusNode) {
+                    let { x, y } = this.focusNode._cfg.model;
+                    switch (keyCode) {
+                        case 37:
+                            x -= 10;
+                            break;
+                        case 38:
+                            y -= 10;
+                            break;
+                        case 39:
+                            x += 10;
+                            break;
+                        case 40:
+                            y += 10;
+                            break;
+                    }
+                    this.focusNode.updatePosition({
+                        x,
+                        y,
+                    });
+                    evt.preventDefault();
+                    evt.stopPropagation();
+                }
+            }
+        });
+    }
+    addGlobalEvent() {
+        const that = this;
+        document.addEventListener('keydown', (event) => {});
+        document.addEventListener(
+            'dragstart',
+            function (event) {
+                that.dragTarget = event.target;
+                that.dragTarget = event.target;
+                // 使其半透明
+                event.target.style.opacity = 0.5;
+            },
+            false
+        );
+        document.addEventListener(
+            'dragend',
+            function (event) {
+                // 重置透明度
+                event.target.style.opacity = '';
+            },
+            false
+        );
+        document.addEventListener(
+            'drop',
+            function (event) {
+                if (event.target.tagName === 'CANVAS') {
+                    let { offsetX, offsetY } = event,
+                        { id } = that.dragTarget!,
+                        targetX = offsetX,
+                        targetY = offsetY,
+                        targetType = that.dragTarget!.getAttribute('type');
+                    // 阻止默认动作（如打开一些元素的链接）
+                    event.preventDefault();
+                    // 将拖动的元素到所选择的放置目标节点中
+                    if (targetType === 'combo') {
+                        that.graph.createCombo(
+                            {
+                                x: targetX,
+                                y: targetY,
+                                type: id,
+                                id: String(Math.random()),
+                                padding: [5, 5, 5, 5],
+                                size: [260, 50],
+                                label: id,
+                                labelCfg: {
+                                    refX: -1,
+                                    refY: -11,
+                                },
+                                style: {},
+                            },
+                            []
+                        );
+                    } else if (targetType === 'node') {
+                        that.graph.addItem('node', {
+                            x: targetX,
+                            y: targetY,
+                            type: id,
+                            ...window[id.toLocaleUpperCase() + '_CONFIG'],
+                            id: String(Math.random()),
+                        });
+                    }
+                }
+            },
+            false
         );
     }
     OnDestroy() {

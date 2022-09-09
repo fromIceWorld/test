@@ -1,15 +1,15 @@
-import { Directive, Input, ViewContainer } from 'my-world';
+import { Directive, Input } from 'my-world';
 @Directive({
     selector: '[forOf]',
 })
 class forof {
     @Input('forOf')
-    arr: Array<any>;
+    arr: Array<any> = [];
     @Input('item')
     item: string = 'item';
     @Input('index')
     index: string = 'index';
-    constructor(private container: ViewContainer) {}
+    constructor() {}
     OnInputChanges(changesObj: any) {
         let views: Array<any> = [];
         if (!this.arr) {

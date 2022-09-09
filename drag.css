@@ -1,0 +1,131 @@
+.g6-component-contextmenu {
+    font-size: 14px;
+    padding: 0;
+}
+.g6-component-contextmenu > div {
+    cursor: pointer;
+}
+.g6-component-contextmenu > ul {
+    margin: 1px;
+}
+.g6-component-contextmenu p:hover {
+    color: #00af1ccf;
+}
+[contenteditable] {
+    width: 100%;
+}
+[draggable] {
+    cursor: pointer;
+    display: inline-block;
+}
+[draggable] > img {
+    padding: 5px;
+}
+.collapse-body > div {
+    margin: 6px 0;
+}
+/* 整个滚动条 */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+    background-color: #ffffff;
+    /* display: none; */
+}
+
+/* 鼠标指针浮动显示 */
+:hover::-webkit-scrollbar {
+    display: block;
+}
+
+/* 滚动条轨道 */
+::-webkit-scrollbar-track {
+    /* 阴影 */
+    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+    background-color: #ffffff;
+}
+
+/* 滚定条滑块 */
+::-webkit-scrollbar-thumb {
+    border-radius: 30px;
+    background-color: #615b5b49;
+}
+foreignObject {
+    width: 100%;
+    overflow: inherit;
+}
+body {
+    margin: 0;
+}
+.collapse-header {
+    cursor: pointer;
+    background-color: #fafafa;
+    padding: 5px;
+}
+.menu {
+    width: 194px;
+    position: absolute;
+    border: 1px solid #615b5b49;
+    border-bottom: none;
+    border-right: none;
+    padding: 2px;
+}
+#drawing-board {
+    border: 1px solid #615b5b49;
+    margin-left: 200px;
+}
+.config-menu {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: #7e7ef214;
+    width: 200px;
+    height: 100%;
+}
+.close {
+    position: absolute;
+    top: 50%;
+    left: -12px;
+    cursor: pointer;
+}
+.tabs {
+    padding-top: 6px;
+    margin-bottom: 14px;
+}
+.tab-body {
+    font-size: 14px;
+    padding: 0 4px;
+}
+.tab {
+    border-bottom: 2px solid blue;
+    padding: 5px;
+    cursor: pointer;
+}
+.tab:hover {
+    background-color: #d4d4de;
+}
+.config-menu {
+    position: fixed;
+    top: 0;
+    right: 0;
+    background-color: #7e7ef214;
+    width: 240px;
+    height: 100%;
+}
+.config-row {
+    display: flex;
+}
+.config-colon {
+    margin: 0 4px 0 2px;
+    font-weight: 600;
+}
+.layout > img {
+    margin: 0 4px;
+    cursor: pointer;
+}
+.label {
+    font-size: 12px;
+}
+app-tab > p {
+    color: #218a67;
+    border-bottom: 1px solid;
+}

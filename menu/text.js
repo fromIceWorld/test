@@ -1,3 +1,4 @@
+let rectText;
 G6.registerNode(
     'text',
     {
@@ -8,6 +9,28 @@ G6.registerNode(
                 fill: '#00000000',
             },
         },
+        drawShape(cfg, group) {
+            const self = this,
+                text = cfg.json.text;
+            // 获取配置中的 Combo 内边距
+            cfg.padding = [5, 5, 5, 5];
+            // 获取样式配置，style.width 与 style.height 对应 rect Combo 位置说明图中的 width 与 height
+            const style = self.getShapeStyle(cfg),
+                width = measureText(text);
+            // 绘制一个矩形作为 keyShape，与 'rect' Combo 的 keyShape 一致
+            rectText = group.addShape('rect', {
+                attrs: {
+                    ...style,
+                    x: 0,
+                    y: 0,
+                    width: width + 10,
+                    height: style.height,
+                },
+                draggable: true,
+                name: 'text-border',
+            });
+            return rectText;
+        },
         afterDraw(cfg, group) {
             const { json } = cfg,
                 { text } = json;
@@ -15,8 +38,8 @@ G6.registerNode(
                 id: 'text',
                 attrs: {
                     text: text,
-                    x: -95,
-                    y: 2,
+                    x: 5,
+                    y: 22,
                     fontSize: 14,
                     textAlign: 'left',
                     textBaseline: 'middle',
@@ -29,9 +52,14 @@ G6.registerNode(
         update(cfg, node) {
             const { json } = cfg,
                 { text } = json,
+                textLength = measureText(text),
                 group = node.getContainer();
             let textShape = group.findById('text');
             textShape.attr('text', text);
+            rectText.attr({
+                width: textLength,
+                height: 40,
+            });
         },
         afterUpdate(cfg, item) {
             // const { json } = cfg,
@@ -45,9 +73,10 @@ G6.registerNode(
 );
 var TEXT_CONFIG = {
     json: {
-        text: '...',
+        text: '姓名',
     },
-    getWidth() {
-        return [300, 100];
+    getWidth(text) {
+        let textWidth = measureText(textString);
+        return [textWidth + options.length * 20, 40];
     },
 };

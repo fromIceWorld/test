@@ -1,4 +1,3 @@
-import { ObjectInterface } from '../../node_modules/my-world/common/interface';
 import { Route } from './Enums/route';
 import { RouterModule } from './index';
 
@@ -8,7 +7,7 @@ class Router {
     preRouteTree: Route[] = [];
     oldHash: string = '';
     newHash: string = '';
-    parems: ObjectInterface<any> = {};
+    parems: any = {};
     subscribers: Array<any> = [];
     constructor() {
         this.routes = RouterModule.routes;

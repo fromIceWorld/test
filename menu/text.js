@@ -9,7 +9,7 @@ G6.registerNode(
                 fill: '#00000000',
             },
         },
-        drawShape(cfg, group) {
+        draw(cfg, group) {
             const self = this,
                 text = cfg.json.text;
             // 获取配置中的 Combo 内边距
@@ -21,8 +21,8 @@ G6.registerNode(
             rectText = group.addShape('rect', {
                 attrs: {
                     ...style,
-                    x: 0,
-                    y: 0,
+                    x: -(width + 10) / 2,
+                    y: -style.height / 2,
                     width: width + 10,
                     height: style.height,
                 },
@@ -33,13 +33,14 @@ G6.registerNode(
         },
         afterDraw(cfg, group) {
             const { json } = cfg,
-                { text } = json;
+                { text } = json,
+                width = measureText(text);
             group.addShape('text', {
                 id: 'text',
                 attrs: {
                     text: text,
-                    x: 5,
-                    y: 22,
+                    x: -width / 2,
+                    y: 2,
                     fontSize: 14,
                     textAlign: 'left',
                     textBaseline: 'middle',

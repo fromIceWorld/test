@@ -49,6 +49,7 @@ class MyComponent {
                 type: 'input',
                 ...INPUT_CONFIG,
                 y: 150,
+                comboId: 'form',
             },
             {
                 id: 'text',
@@ -57,11 +58,23 @@ class MyComponent {
                 type: 'text',
                 ...TEXT_CONFIG,
                 y: 200,
+                comboId: 'form',
+            },
+        ],
+        combos: [
+            {
+                id: 'form',
+                description: '文字',
+                x: 170,
+                type: 'form',
+                ...FORM_CONFIG,
+                y: 200,
             },
         ],
     };
     graph: any;
     focusNode: any = null;
+    focusCombo: any = null;
     jsonOnEdit: boolean = false;
     coll: boolean = true;
     config = [];
@@ -104,7 +117,31 @@ class MyComponent {
         this.jsonOnEdit = value;
     }
     changeNodeLayout(e) {
-        console.log(e);
+        let { detail } = e,
+            { dom, value } = detail;
+        console.log(value, this.focusCombo);
+        if (this.focusCombo) {
+            const { nodes, combos } = this.focusCombo.getChildren(),
+                containerModel = this.focusCombo._cfg.model,
+                { minX, minY, x, y } = this.focusCombo._cfg.bbox,
+                elements = nodes.concat(combos);
+            if (value.layout == 'row') {
+                console.log(minX, elements);
+                elements.reduce((pre, element) => {
+                    const { bboxCanvasCache, model } = element._cfg,
+                        { width, height } = bboxCanvasCache;
+                    console.log('width', width);
+                    element.updatePosition({
+                        x: pre + width / 2,
+                        y: y,
+                    });
+                    console.log(pre + width);
+                    return pre + width;
+                }, minX);
+                this.graph.updateCombos();
+            } else {
+            }
+        }
     }
     updateNode(e) {
         const model = this.focusNode._cfg.model,
@@ -197,6 +234,7 @@ class MyComponent {
         const graph = this.graph;
         graph.on('click', (evt) => {
             const { item } = evt;
+            this.focusCombo = item;
             if (item !== this.focusNode) {
                 if (this.focusNode) {
                     this.unFocus(this.focusNode);
@@ -208,12 +246,13 @@ class MyComponent {
             }
         });
         graph.on('node:click', (evt) => {
+            this.focusCombo = null;
             const { item, shape } = evt,
                 model = item._cfg.model,
                 getWidth = model.getWidth,
                 comboId = model.comboId,
                 json = item._cfg.model.json;
-            console.log(model.comboId);
+            console.log(item);
             this.unFocus(this.focusNode);
             this.focus(item); //focus当前节点
             this.focusNode = item;

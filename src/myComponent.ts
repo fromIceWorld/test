@@ -66,8 +66,7 @@ class MyComponent {
                 id: 'form',
                 description: '文字',
                 x: 170,
-                type: 'form',
-                ...FORM_CONFIG,
+                label: 'form-default',
                 y: 200,
             },
         ],
@@ -124,38 +123,83 @@ class MyComponent {
             const { nodes, combos } = this.focusCombo.getChildren(),
                 { minX, minY } = this.focusCombo._cfg.bbox,
                 elements = nodes.concat(combos);
+            console.log('node + combos', elements);
             if (value.layout == 'row') {
                 elements.reduce((pre, element) => {
-                    const { bboxCanvasCache, model } = element._cfg,
+                    const { bboxCanvasCache, model, type } = element._cfg,
                         { x } = model,
                         { width, centerY, minX, minY: minYY } = bboxCanvasCache;
-                    element.updatePosition({
-                        y: minY + centerY - minYY,
-                        x: x - minX + pre,
-                    });
-                    element.refresh();
-                    return pre + width;
+                    if (type == 'combo') {
+                        this.updateComboPosition(
+                            element,
+                            x - minX + pre,
+                            minY + centerY - minYY
+                        );
+                        return width;
+                    } else {
+                        element.updatePosition({
+                            x: x - minX + pre,
+                            y: minY + centerY - minYY,
+                        });
+                        return pre + width;
+                    }
                 }, minX);
             } else {
                 elements.reduce((pre: number, element) => {
-                    const { bboxCanvasCache, model } = element._cfg,
+                    const { bboxCanvasCache, model, type } = element._cfg,
                         { x } = model,
                         {
+                            width,
                             height,
                             centerY,
                             minY: minYY,
                             minX: minXX,
                         } = bboxCanvasCache;
-                    element.updatePosition({
-                        x: minX + x - minXX,
-                        y: pre + centerY - minYY,
-                    });
-                    element.refresh();
-                    return pre + height;
+                    if (type == 'combo') {
+                        this.updateComboPosition(
+                            element,
+                            minX + x - minXX,
+                            pre + centerY - minYY
+                        );
+                        return width;
+                    } else {
+                        element.updatePosition({
+                            x: minX + x - minXX,
+                            y: pre + centerY - minYY,
+                        });
+                        return pre + height;
+                    }
                 }, minY);
             }
             this.graph.updateCombos();
         }
+    }
+    // combo 是自适应子节点的，updatePosition时，无法直接操作，需要更改子node
+    updateComboPosition(combo: any, targetX: number, targetY: number) {
+        const { bboxCanvasCache, model, type } = combo._cfg,
+            { minX, minY } = bboxCanvasCache,
+            { x: xx, y: yy } = model,
+            { nodes, combos } = combo.getChildren();
+        if (!nodes.length && !combos.length) {
+            combo.updatePosition({
+                x: targetX,
+                y: targetY,
+            });
+            return;
+        }
+        console.log(nodes, combos);
+        nodes.concat(combos).forEach((item: any) => {
+            const { type, model } = item._cfg,
+                { x, y, minX: minXX, minY: minYY } = model;
+            if (type == 'node') {
+                item.updatePosition({
+                    x: targetX + x - xx,
+                    y: targetY + y - yy,
+                });
+            } else if (type == 'combo') {
+                this.updateComboPosition(item, targetX, targetY);
+            }
+        });
     }
     updateNode(e) {
         const model = this.focusNode._cfg.model,
@@ -210,6 +254,12 @@ class MyComponent {
                 },
                 defaultCombo: {
                     type: 'rect', // Combo 类型
+                    size: [40, 30],
+                    padding: [5, 5, 5, 5],
+                    labelCfg: {
+                        refX: 0,
+                        refY: -11,
+                    },
                     // ... 其他配置
                 },
                 plugins: [rightMenu],
@@ -371,15 +421,9 @@ class MyComponent {
                             {
                                 x: targetX,
                                 y: targetY,
-                                type: id,
                                 id: String(Math.random()),
                                 padding: [5, 5, 5, 5],
-                                size: [260, 50],
                                 label: id,
-                                labelCfg: {
-                                    refX: -1,
-                                    refY: -11,
-                                },
                                 style: {},
                             },
                             []

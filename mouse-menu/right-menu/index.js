@@ -10,6 +10,7 @@ var rightMenu = new G6.Menu({
         if (type == 'combo') {
             outDiv.innerHTML = `<ul>
                 <p id="合并">合并</p>
+                <p id="取消合并">取消合并</p>
                 <p id="实例化组合">实例化组合</p>
                 <p id="克隆">克隆</p>
             </ul>`;
@@ -31,6 +32,11 @@ var rightMenu = new G6.Menu({
                 let { nodes, combos } = item.getChildren();
                 nodes.forEach((node) => {
                     node.lock();
+                });
+            } else if (target.id == '取消合并') {
+                let { nodes, combos } = item.getChildren();
+                nodes.forEach((node) => {
+                    node.unlock();
                 });
             } else if (target.id == '克隆') {
                 clone(item);

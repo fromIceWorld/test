@@ -15,21 +15,21 @@ G6.registerNode(
                 fill: '#00000000',
             },
         },
-        drawShape: function (cfg, group) {
-            const self = this;
+        draw: function (cfg, group) {
+            const self = this,
+                options = cfg.json.options;
             // 获取配置中的 Combo 内边距
             cfg.padding = [5, 5, 5, 5];
             // 获取样式配置，style.width 与 style.height 对应 rect Combo 位置说明图中的 width 与 height
-            const style = self.getShapeStyle(cfg);
+            const style = self.getShapeStyle(cfg),
+                width = computedWidth(options);
             // 绘制一个矩形作为 keyShape，与 'rect' Combo 的 keyShape 一致
             rect = group.addShape('rect', {
                 attrs: {
                     ...style,
-                    x: -style.width / 2 - (cfg.padding[3] - cfg.padding[1]) / 2,
-                    y:
-                        -style.height / 2 -
-                        (cfg.padding[0] - cfg.padding[2]) / 2,
-                    width: style.width,
+                    x: -width / 2,
+                    y: -20,
+                    width: width + 10,
                     height: style.height,
                 },
                 draggable: true,
@@ -62,51 +62,59 @@ function renderRadio(group, json, destroy) {
         });
         shapes = [];
     }
-    const { options } = json;
-    let result = JSON.parse(options).reduce((preWidth, item, index) => {
-        let text = group.addShape('text', {
-            id: item.value,
-            attrs: {
-                x: 15 + preWidth,
-                y: 12,
-                text: item.label,
-                fontSize: 14,
-                textAlign: 'left',
-                textBaseline: 'middle',
-                fill: '#000000d9',
-            },
-            name: item.label + '_label' + Math.random(),
-        });
-        if (item.checked) {
-            let circleInner = group.addShape('circle', {
+    const { options } = json,
+        boxWidth = computedWidth(options, group);
+    let width =
+        JSON.parse(options).reduce((preWidth, item, index) => {
+            let text = group.addShape('text', {
+                id: item.value,
+                attrs: {
+                    x: 15 + preWidth,
+                    y: 4,
+                    text: item.label,
+                    fontSize: 14,
+                    textAlign: 'left',
+                    textBaseline: 'middle',
+                    fill: '#000000d9',
+                },
+                name: item.label + '_label' + Math.random(),
+            });
+            if (item.checked) {
+                let circleInner = group.addShape('circle', {
+                    attrs: {
+                        x: preWidth,
+                        y: 3,
+                        r: 4,
+                        fill: item.checked ? innerChecedFill : outerChecedFill,
+                    },
+                    // must be assigned in G6 3.3 and later versions. it can be any value you want
+                    name: item.label + '_inner-circle' + Math.random(),
+                });
+                shapes.push(circleInner);
+            }
+            let circleOuter = group.addShape('circle', {
                 attrs: {
                     x: preWidth,
-                    y: 10,
-                    r: 4,
-                    fill: item.checked ? innerChecedFill : outerChecedFill,
+                    y: 3,
+                    r: 7,
+                    stroke: item.checked ? '#1890ff' : '#d9d9d9',
                 },
                 // must be assigned in G6 3.3 and later versions. it can be any value you want
-                name: item.label + '_inner-circle' + Math.random(),
+                name: item.label + '_outer-circle' + Math.random(),
             });
-            shapes.push(circleInner);
-        }
-        let circleOuter = group.addShape('circle', {
-            attrs: {
-                x: preWidth,
-                y: 10,
-                r: 7,
-                stroke: item.checked ? '#1890ff' : '#d9d9d9',
-            },
-            // must be assigned in G6 3.3 and later versions. it can be any value you want
-            name: item.label + '_outer-circle' + Math.random(),
-        });
-        shapes.push(text, circleOuter);
-        return preWidth + 30 + measureText(item.label);
-    }, 5);
+            shapes.push(text, circleOuter);
+            return preWidth + 30 + measureText(item.label);
+        }, 5 - 30) + 30;
     rect.attr({
-        width: result,
+        width: boxWidth,
         height: 40,
     });
+}
+function computedWidth(optionsString) {
+    let width = JSON.parse(optionsString).reduce((preWidth, item, index) => {
+        return preWidth + 30 + measureText(item.label);
+    }, 0);
+    return width;
 }
 var RADIO_CONFIG = {
     json: {

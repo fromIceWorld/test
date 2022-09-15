@@ -1,5 +1,5 @@
 import { CheckDetectChange, Component, Inject, ViewChild } from 'my-world';
-
+import { deepCopy } from './common/index';
 @Component({
     selector: `#root`,
     styles: ``,
@@ -117,44 +117,67 @@ class MyComponent {
         this.jsonOnEdit = value;
     }
     changeNodeLayout(e) {
+        // bboxCanvasCache储存的是旧的数据，更新后节点的中心点在model中，而且center不变
         let { detail } = e,
-            { dom, value } = detail;
-        console.log(value, this.focusCombo);
+            { value } = detail;
         if (this.focusCombo) {
             const { nodes, combos } = this.focusCombo.getChildren(),
-                containerModel = this.focusCombo._cfg.model,
-                { minX, minY, x, y } = this.focusCombo._cfg.bbox,
+                { minX, minY } = this.focusCombo._cfg.bbox,
                 elements = nodes.concat(combos);
             if (value.layout == 'row') {
-                console.log(minX, elements);
                 elements.reduce((pre, element) => {
                     const { bboxCanvasCache, model } = element._cfg,
-                        { width, height } = bboxCanvasCache;
-                    console.log('width', width);
+                        { x } = model,
+                        { width, centerY, minX, minY: minYY } = bboxCanvasCache;
                     element.updatePosition({
-                        x: pre + width / 2,
-                        y: y,
+                        y: minY + centerY - minYY,
+                        x: x - minX + pre,
                     });
-                    console.log(pre + width);
+                    element.refresh();
                     return pre + width;
                 }, minX);
-                this.graph.updateCombos();
             } else {
+                elements.reduce((pre: number, element) => {
+                    const { bboxCanvasCache, model } = element._cfg,
+                        { x } = model,
+                        {
+                            height,
+                            centerY,
+                            minY: minYY,
+                            minX: minXX,
+                        } = bboxCanvasCache;
+                    element.updatePosition({
+                        x: minX + x - minXX,
+                        y: pre + centerY - minYY,
+                    });
+                    element.refresh();
+                    return pre + height;
+                }, minY);
             }
+            this.graph.updateCombos();
         }
     }
     updateNode(e) {
         const model = this.focusNode._cfg.model,
-            getWidth = model.getWidth,
-            comboId = model.comboId,
+            { x } = model,
             json = this.focusNode._cfg.model.json;
-        let { detail } = e,
-            { dom, value } = detail;
-        console.log(dom, value);
-        Object.assign(json, value);
+        let { dom, value } = e.detail,
+            { json: newJson, config } = value;
+        const { currerntLength, previousLength } = config;
+        const newX = this.computedX(x, previousLength, currerntLength);
+        Object.assign(json, newJson);
+        console.log('更新前：', this.focusNode.getBBox());
         this.graph.updateItem(this.focusNode, {
             ...model,
+            config,
         });
+        this.graph.updateCombos();
+    }
+    // 计算节点新的X节点
+    computedX(x: number, previousLength: number, currentLength: number) {
+        let diff = currentLength - previousLength;
+        console.log(x, diff);
+        return x;
     }
     OnInit() {
         console.log('%cmyComponent: %cOnInit', 'color:green', 'color:blue');
@@ -362,13 +385,16 @@ class MyComponent {
                             []
                         );
                     } else if (targetType === 'node') {
-                        that.graph.addItem('node', {
+                        let newNode = that.graph.addItem('node', {
                             x: targetX,
                             y: targetY,
                             type: id,
-                            ...window[id.toLocaleUpperCase() + '_CONFIG'],
+                            ...deepCopy(
+                                window[id.toLocaleUpperCase() + '_CONFIG']
+                            ),
                             id: String(Math.random()),
                         });
+                        console.log(newNode);
                     }
                 }
             },

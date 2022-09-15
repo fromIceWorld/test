@@ -1,3 +1,9 @@
+// 计算节点新的X节点
+function computedX(x, previousLength, currentLength) {
+    let diff = currentLength - previousLength;
+    console.log(x, diff);
+    return x;
+}
 let rectText;
 G6.registerNode(
     'text',
@@ -16,14 +22,13 @@ G6.registerNode(
             cfg.padding = [5, 5, 5, 5];
             // 获取样式配置，style.width 与 style.height 对应 rect Combo 位置说明图中的 width 与 height
             const style = self.getShapeStyle(cfg),
-                width = measureText(text);
+                width = measureText(text, '14px');
             // 绘制一个矩形作为 keyShape，与 'rect' Combo 的 keyShape 一致
             rectText = group.addShape('rect', {
                 attrs: {
                     ...style,
-                    x: -(width + 10) / 2,
-                    y: -style.height / 2,
                     width: width + 10,
+                    x: -(width + 10) / 2,
                     height: style.height,
                 },
                 draggable: true,
@@ -34,15 +39,15 @@ G6.registerNode(
         afterDraw(cfg, group) {
             const { json } = cfg,
                 { text } = json,
-                width = measureText(text);
+                width = measureText(text, '14px');
             group.addShape('text', {
                 id: 'text',
                 attrs: {
                     text: text,
-                    x: -width / 2,
-                    y: 2,
+                    x: -(width + 10) / 2 + 5,
+                    y: 0,
                     fontSize: 14,
-                    textAlign: 'left',
+                    textAlign: 'start',
                     textBaseline: 'middle',
                     fill: '#000000d9',
                 },
@@ -51,15 +56,13 @@ G6.registerNode(
             });
         },
         update(cfg, node) {
-            const { json } = cfg,
-                { text } = json,
-                textLength = measureText(text),
+            const { text } = cfg.json,
+                textLength = measureText(text, '14px'),
                 group = node.getContainer();
             let textShape = group.findById('text');
             textShape.attr('text', text);
             rectText.attr({
-                width: textLength,
-                height: 40,
+                width: textLength + 10,
             });
         },
         afterUpdate(cfg, item) {
@@ -75,9 +78,5 @@ G6.registerNode(
 var TEXT_CONFIG = {
     json: {
         text: '姓名',
-    },
-    getWidth(text) {
-        let textWidth = measureText(textString);
-        return [textWidth + options.length * 20, 40];
     },
 };

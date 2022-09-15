@@ -31,6 +31,7 @@ class TabComponent {
     @Output('changeLayout') changeLayout = new EventEmitter('changeLayout');
     @Input('config') config = [];
     tabsConfig = [{}];
+    editContent = '';
     constructor() {}
     OnInputChanges(changesObj: any) {}
     changeFlex(e) {
@@ -44,16 +45,31 @@ class TabComponent {
     emitUpdate(e, key) {
         this.editEvent.emit(false);
         let target = e.target,
-            value = Array.from(target.childNodes)
-                .map((text) => text.nodeValue)
-                .join('');
-        console.log(e, key, value);
+            content = this.getContent(target);
+        console.log(e, key, content);
         this.updateJSON.emit({
-            [key]: value,
+            json: {
+                [key]: content,
+            },
+            config: {
+                currerntLength: measureText(content, '14px'),
+                previousLength: measureText(this.editContent, '14px'),
+            },
         });
     }
     onEdit(e) {
+        this.editContent = this.getContent(e.target);
         this.editEvent.emit(true);
+    }
+    /**
+     *
+     * @param target 输入框
+     * @returns 输入框内容
+     */
+    getContent(target: Element) {
+        return Array.from(target.childNodes)
+            .map((text) => text.nodeValue)
+            .join('');
     }
     OnInit() {
         console.log('%ctab: %cOnIinit', 'color:#bf7313', 'color:blue');

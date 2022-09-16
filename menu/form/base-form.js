@@ -1,4 +1,6 @@
-var FORM_CONFIG = {};
+var FORM_CONFIG = {
+    json: {},
+};
 G6.registerCombo(
     'form',
     {

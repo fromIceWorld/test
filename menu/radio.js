@@ -19,7 +19,7 @@ G6.registerNode(
             const self = this,
                 options = cfg.json.options;
             // 获取配置中的 Combo 内边距
-            cfg.padding = [5, 5, 5, 5];
+            cfg.padding = [0, 0, 0, 0];
             // 获取样式配置，style.width 与 style.height 对应 rect Combo 位置说明图中的 width 与 height
             const style = self.getShapeStyle(cfg),
                 width = computedWidth(options);
@@ -28,7 +28,7 @@ G6.registerNode(
                 attrs: {
                     ...style,
                     x: -width / 2,
-                    y: -20,
+                    y: -15,
                     width: width + 10,
                     height: style.height,
                 },
@@ -70,7 +70,7 @@ function renderRadio(group, json, destroy) {
                 id: item.value,
                 attrs: {
                     x: 15 + preWidth,
-                    y: 4,
+                    y: 2,
                     text: item.label,
                     fontSize: 14,
                     textAlign: 'left',
@@ -83,7 +83,7 @@ function renderRadio(group, json, destroy) {
                 let circleInner = group.addShape('circle', {
                     attrs: {
                         x: preWidth,
-                        y: 3,
+                        y: 0,
                         r: 4,
                         fill: item.checked ? innerChecedFill : outerChecedFill,
                     },
@@ -95,7 +95,7 @@ function renderRadio(group, json, destroy) {
             let circleOuter = group.addShape('circle', {
                 attrs: {
                     x: preWidth,
-                    y: 3,
+                    y: 0,
                     r: 7,
                     stroke: item.checked ? '#1890ff' : '#d9d9d9',
                 },
@@ -107,7 +107,7 @@ function renderRadio(group, json, destroy) {
         }, 5 - 30) + 30;
     rect.attr({
         width: boxWidth,
-        height: 40,
+        height: 30,
     });
 }
 function computedWidth(optionsString) {

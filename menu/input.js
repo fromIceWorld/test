@@ -3,7 +3,7 @@ G6.registerNode(
     {
         options: {
             myName: 'Input',
-            size: [210, 40],
+            size: [202, 32],
             style: {
                 fill: '#00000000',
             },
@@ -11,6 +11,7 @@ G6.registerNode(
         afterDraw(cfg, group) {
             const { json } = cfg,
                 { placeholder } = json;
+            cfg.padding = [0, 0, 0, 0];
             group.addShape('text', {
                 id: 'text',
                 attrs: {
@@ -32,7 +33,7 @@ G6.registerNode(
                     width: 200,
                     height: 30,
                     stroke: '#d9d9d9',
-                    radius: [2, 4],
+                    radius: [2, 2],
                 },
                 // must be assigned in G6 3.3 and later versions. it can be any value you want
                 name: 'rect-shape',

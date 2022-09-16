@@ -10,7 +10,7 @@ G6.registerNode(
     {
         options: {
             myName: 'text',
-            size: [210, 40],
+            size: [200, 30],
             style: {
                 fill: '#00000000',
             },
@@ -45,7 +45,7 @@ G6.registerNode(
                 attrs: {
                     text: text,
                     x: -(width + 10) / 2 + 5,
-                    y: 0,
+                    y: 2,
                     fontSize: 14,
                     textAlign: 'start',
                     textBaseline: 'middle',

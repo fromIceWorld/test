@@ -49,7 +49,7 @@ class MyComponent {
                 type: 'input',
                 ...INPUT_CONFIG,
                 y: 150,
-                comboId: 'form',
+                comboId: '112',
             },
             {
                 id: 'text',
@@ -58,12 +58,12 @@ class MyComponent {
                 type: 'text',
                 ...TEXT_CONFIG,
                 y: 200,
-                comboId: 'form',
+                comboId: '112',
             },
         ],
         combos: [
             {
-                id: 'form',
+                id: '112',
                 description: '文字',
                 x: 170,
                 label: 'form-default',
@@ -123,7 +123,6 @@ class MyComponent {
             const { nodes, combos } = this.focusCombo.getChildren(),
                 { minX, minY } = this.focusCombo._cfg.bbox,
                 elements = nodes.concat(combos);
-            console.log('node + combos', elements);
             if (value.layout == 'row') {
                 elements.reduce((pre, element) => {
                     const { bboxCanvasCache, model, type } = element._cfg,
@@ -187,7 +186,6 @@ class MyComponent {
             });
             return;
         }
-        console.log(nodes, combos);
         nodes.concat(combos).forEach((item: any) => {
             const { type, model } = item._cfg,
                 { x, y, minX: minXX, minY: minYY } = model;
@@ -197,7 +195,11 @@ class MyComponent {
                     y: targetY + y - yy,
                 });
             } else if (type == 'combo') {
-                this.updateComboPosition(item, targetX, targetY);
+                this.updateComboPosition(
+                    item,
+                    targetX + x - xx,
+                    targetY + y - yy
+                );
             }
         });
     }
@@ -220,7 +222,6 @@ class MyComponent {
     // 计算节点新的X节点
     computedX(x: number, previousLength: number, currentLength: number) {
         let diff = currentLength - previousLength;
-        console.log(x, diff);
         return x;
     }
     OnInit() {
@@ -249,16 +250,30 @@ class MyComponent {
                 nodeStateStyles: {
                     focus: {
                         lineWidth: 1,
-                        stroke: '#1890ff',
+                        stroke: '#1085cac9',
+                        shadowOffsetX: 1,
+                        shadowOffsetY: 1,
+                        shadowColor: '#74b8e196',
+                        radius: [2, 2],
                     },
                 },
                 defaultCombo: {
                     type: 'rect', // Combo 类型
                     size: [40, 30],
-                    padding: [5, 5, 5, 5],
+                    padding: [8, 8, 8, 8],
+                    style: {
+                        lineWidth: 1,
+                        fill: '#00000000',
+                        lineDash: [5],
+                    },
                     labelCfg: {
-                        refX: 0,
-                        refY: -11,
+                        refX: 1,
+                        refY: 1,
+                        style: {
+                            // fontWeight: 600,
+                            fill: '#e31366',
+                            fontSize: 10,
+                        },
                     },
                     // ... 其他配置
                 },
@@ -422,7 +437,6 @@ class MyComponent {
                                 x: targetX,
                                 y: targetY,
                                 id: String(Math.random()),
-                                padding: [5, 5, 5, 5],
                                 label: id,
                                 style: {},
                             },

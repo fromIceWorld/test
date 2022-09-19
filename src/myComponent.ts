@@ -1,5 +1,4 @@
 import { CheckDetectChange, Component, Inject, ViewChild } from 'my-world';
-import { deepCopy } from './common/index';
 @Component({
     selector: `#root`,
     styles: ``,
@@ -18,6 +17,7 @@ import { deepCopy } from './common/index';
                         </div>
                     </div>
             </div>
+            <span @click="exportData($event)">导出数据</span>
         </div>
         <div id="drawing-board" #drawing-board style="width: 1920px; height: 1080px"></div>
         <!-- 侧边配置栏 -->
@@ -41,35 +41,8 @@ class MyComponent {
     board;
     dragTarget: EventTarget | null = null;
     data = {
-        nodes: [
-            {
-                id: 'input',
-                description: '单纯的输入框,只携带 placeholder',
-                x: 250,
-                type: 'input',
-                ...INPUT_CONFIG,
-                y: 150,
-                comboId: '112',
-            },
-            {
-                id: 'text',
-                description: '文字',
-                x: 170,
-                type: 'text',
-                ...TEXT_CONFIG,
-                y: 200,
-                comboId: '112',
-            },
-        ],
-        combos: [
-            {
-                id: '112',
-                description: '文字',
-                x: 170,
-                label: 'form-default',
-                y: 200,
-            },
-        ],
+        nodes: [],
+        combos: [],
     };
     graph: any;
     focusNode: any = null;
@@ -105,7 +78,34 @@ class MyComponent {
         },
     ];
     constructor(@Inject(CheckDetectChange) private cd: CheckDetectChange) {}
-
+    exportData(e) {
+        let innerHTML = this.exportCombo(this.graph.getCombos()[0]);
+        let d = document.createElement('div');
+        d.innerHTML = innerHTML;
+        document.body.append(d);
+    }
+    exportCombo(combo) {
+        let s = '',
+            { config } = combo._cfg.model,
+            { abstract } = config,
+            { html, style } = abstract,
+            { nodes, combos } = combo.getChildren();
+        s += `<${html.tagName} style="${Object.entries(style)
+            .map(([key, value]) => {
+                return key + ':' + value;
+            })
+            .join(';')}">`;
+        nodes.forEach((node) => {
+            const { config } = node._cfg.model,
+                { json, abstract } = config;
+            s += config.render(abstract, json);
+        });
+        combos.forEach((item) => {
+            s += this.exportCombo(item);
+        });
+        s += `</${html.tagName}>`;
+        return s;
+    }
     emit(e: EventTarget, value: any) {
         console.log(e, value, this);
     }
@@ -124,6 +124,10 @@ class MyComponent {
                 { minX, minY } = this.focusCombo._cfg.bbox,
                 elements = nodes.concat(combos);
             if (value.layout == 'row') {
+                // 修改combo layout json
+                this.focusCombo._cfg.model.config.json['flex-direction'] =
+                    'row';
+                console.log(this.focusCombo._cfg.model);
                 elements.reduce((pre, element) => {
                     const { bboxCanvasCache, model, type } = element._cfg,
                         { x } = model,
@@ -134,6 +138,7 @@ class MyComponent {
                             x - minX + pre,
                             minY + centerY - minYY
                         );
+                        // 更改comco layout 配置
                         return width;
                     } else {
                         element.updatePosition({
@@ -144,6 +149,9 @@ class MyComponent {
                     }
                 }, minX);
             } else {
+                // 修改combo layout json
+                this.focusCombo._cfg.model.config.json['flex-direction'] =
+                    'column';
                 elements.reduce((pre: number, element) => {
                     const { bboxCanvasCache, model, type } = element._cfg,
                         { x } = model,
@@ -205,18 +213,14 @@ class MyComponent {
     }
     updateNode(e) {
         const model = this.focusNode._cfg.model,
-            { x } = model,
-            json = this.focusNode._cfg.model.json;
+            config = model.config,
+            json = model.config.json;
         let { dom, value } = e.detail,
-            { json: newJson, config } = value;
-        const { currerntLength, previousLength } = config;
-        const newX = this.computedX(x, previousLength, currerntLength);
+            { json: newJson } = value;
         Object.assign(json, newJson);
         console.log('更新前：', this.focusNode.getBBox());
-        this.graph.updateItem(this.focusNode, {
-            ...model,
-            config,
-        });
+        this.graph.updateItem(this.focusNode, model);
+        model.config = config;
         this.graph.updateCombos();
     }
     // 计算节点新的X节点
@@ -335,16 +339,13 @@ class MyComponent {
         });
         graph.on('node:click', (evt) => {
             this.focusCombo = null;
-            const { item, shape } = evt,
-                model = item._cfg.model,
-                getWidth = model.getWidth,
-                comboId = model.comboId,
-                json = item._cfg.model.json;
+            const { item } = evt,
+                json = item._cfg.model.config.json;
             console.log(item);
             this.unFocus(this.focusNode);
             this.focus(item); //focus当前节点
             this.focusNode = item;
-            this.config = [model.json];
+            this.config = [json];
             this.cd.detectChanges();
         });
         graph.on('combo:click', (evt) => {
@@ -437,8 +438,12 @@ class MyComponent {
                                 x: targetX,
                                 y: targetY,
                                 id: String(Math.random()),
+                                type: id,
                                 label: id,
                                 style: {},
+                                config: new configModule[
+                                    id.toLocaleUpperCase() + '_CONFIG'
+                                ](),
                             },
                             []
                         );
@@ -447,9 +452,9 @@ class MyComponent {
                             x: targetX,
                             y: targetY,
                             type: id,
-                            ...deepCopy(
-                                window[id.toLocaleUpperCase() + '_CONFIG']
-                            ),
+                            config: new configModule[
+                                id.toLocaleUpperCase() + '_CONFIG'
+                            ](),
                             id: String(Math.random()),
                         });
                         console.log(newNode);

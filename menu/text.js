@@ -17,7 +17,7 @@ G6.registerNode(
         },
         draw(cfg, group) {
             const self = this,
-                text = cfg.json.text;
+                text = cfg.config.json.text;
             // 获取配置中的 Combo 内边距
             cfg.padding = [5, 5, 5, 5];
             // 获取样式配置，style.width 与 style.height 对应 rect Combo 位置说明图中的 width 与 height
@@ -37,9 +37,9 @@ G6.registerNode(
             return rectText;
         },
         afterDraw(cfg, group) {
-            const { json } = cfg,
-                { text } = json,
-                width = measureText(text, '14px');
+            const { config } = cfg,
+                { text } = config.json;
+            width = measureText(text, '14px');
             group.addShape('text', {
                 id: 'text',
                 attrs: {
@@ -56,7 +56,7 @@ G6.registerNode(
             });
         },
         update(cfg, node) {
-            const { text } = cfg.json,
+            const { text } = cfg.config.json,
                 textLength = measureText(text, '14px'),
                 group = node.getContainer();
             let textShape = group.findById('text');
@@ -75,8 +75,23 @@ G6.registerNode(
     },
     'rect'
 );
-var TEXT_CONFIG = {
-    json: {
+
+// 独属于每一个节点的render函数，在G6中会被抹除，通过原型保存
+class TEXT_CONFIG {
+    json = {
         text: '姓名',
-    },
-};
+    };
+    abstract = {
+        html: {
+            tagName: 'span',
+            attributes: {},
+        },
+        classes: '',
+        style: {},
+    };
+    render(abstract, json) {
+        const { html, classes, style } = abstract;
+        return `<${html.tagName}>${json.text}</${html.tagName}>`;
+    }
+}
+configModule['TEXT_CONFIG'] = TEXT_CONFIG;

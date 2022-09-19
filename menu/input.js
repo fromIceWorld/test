@@ -9,15 +9,15 @@ G6.registerNode(
             },
         },
         afterDraw(cfg, group) {
-            const { json } = cfg,
-                { placeholder } = json;
+            const { config } = cfg,
+                { placeholder } = config.json;
             cfg.padding = [0, 0, 0, 0];
             group.addShape('text', {
                 id: 'text',
                 attrs: {
                     text: placeholder,
                     x: -95,
-                    y: 2,
+                    y: 1,
                     fontSize: 14,
                     textAlign: 'left',
                     textBaseline: 'middle',
@@ -40,7 +40,7 @@ G6.registerNode(
             });
         },
         update(cfg, node) {
-            const { json } = cfg,
+            const { json } = cfg.config,
                 { placeholder } = json,
                 group = node.getContainer();
             let textShape = group.findById('text');
@@ -55,9 +55,21 @@ G6.registerNode(
     },
     'rect'
 );
-var INPUT_CONFIG = {
-    json: { placeholder: '请输入' },
-    getWidth() {
-        return [210, 40];
-    },
-};
+class INPUT_CONFIG {
+    json = { placeholder: '请输入' };
+    abstract = {
+        html: {
+            tagName: 'input',
+            attributes: {
+                type: 'text',
+            },
+        },
+        classes: '',
+        style: {},
+    };
+    render(abstract, json) {
+        const { html, classes, style } = abstract;
+        return `<${html.tagName} placeholder = "${json.placeholder}"></${html.tagName}>`;
+    }
+}
+configModule['INPUT_CONFIG'] = INPUT_CONFIG;

@@ -51,10 +51,6 @@ class TabComponent {
             json: {
                 [key]: content,
             },
-            config: {
-                currerntLength: measureText(content, '14px'),
-                previousLength: measureText(this.editContent, '14px'),
-            },
         });
     }
     onEdit(e) {

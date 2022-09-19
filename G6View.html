@@ -209,7 +209,6 @@
     graph.on('node:click', (evt) => {
         const { item, shape } = evt,
             model = item._cfg.model,
-            getWidth = model.getWidth,
             comboId = model.comboId,
             json = item._cfg.model.json;
         console.log(model.comboId);
@@ -256,7 +255,6 @@
                 // }
                 // focusNode = newNode;
 
-                // newWidth = getWidth();
                 // // // 更新节点的
                 // newNode.update({
                 //     size: [50, 50],

@@ -17,7 +17,7 @@ G6.registerNode(
         },
         draw: function (cfg, group) {
             const self = this,
-                options = cfg.json.options;
+                options = cfg.config.json.options;
             // 获取配置中的 Combo 内边距
             cfg.padding = [0, 0, 0, 0];
             // 获取样式配置，style.width 与 style.height 对应 rect Combo 位置说明图中的 width 与 height
@@ -38,14 +38,13 @@ G6.registerNode(
             return rect;
         },
         afterDraw(cfg, group) {
-            console.log(cfg, group);
-            const { json } = cfg,
-                { options } = json;
+            const { config } = cfg,
+                { options } = config.json;
             renderRadio(group, json, false);
             preOptions = options;
         },
         update(cfg, node) {
-            const { json } = cfg,
+            const { json } = cfg.config,
                 group = node.get('group'),
                 { options } = json;
             renderRadio(group, json, true);
@@ -116,17 +115,22 @@ function computedWidth(optionsString) {
     }, 0);
     return width;
 }
-var RADIO_CONFIG = {
-    json: {
+class RADIO_CONFIG {
+    json = {
         options: JSON.stringify([
             { label: 'A', value: 'A', checked: true },
             { label: 'B', value: 'B' },
         ]),
-    },
-    getWidth(optionsString) {
-        let options = JSON.parse(optionsString),
-            textString = options.map((option) => option.label).join('');
-        let textWidth = measureText(textString);
-        return [textWidth + options.length * 20, 40];
-    },
-};
+    };
+    abstract = {
+        html: {
+            tagName: 'input',
+            attributes: {
+                type: 'radio',
+            },
+        },
+        classes: '',
+        style: {},
+    };
+}
+configModule['RADIO_CONFIG'] = RADIO_CONFIG;

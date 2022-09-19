@@ -1,7 +1,39 @@
-var COMBINATION_CONFIG = {};
+class COMBINATION_CONFIG {
+    json = {};
+    abstract = {
+        html: {
+            tagName: 'div',
+            attributes: {},
+        },
+        classes: '',
+        style: {
+            display: 'flex',
+            'flex-direction': 'row',
+        },
+    };
+}
+configModule['COMBINATION_CONFIG'] = COMBINATION_CONFIG;
+
 G6.registerCombo(
     'combination',
     {
+        options: {
+            style: {
+                lineWidth: 1,
+                fill: '#00000000',
+                stroke: '#efefef',
+                lineDash: [5],
+            },
+            labelCfg: {
+                refX: 1,
+                refY: 1,
+                style: {
+                    // fontWeight: 600,
+                    fill: '#e31366',
+                    fontSize: 10,
+                },
+            },
+        },
         drawShape: function drawShape(cfg, group) {
             const self = this;
             // 获取配置中的 Combo 内边距
@@ -16,8 +48,8 @@ G6.registerCombo(
                     y:
                         -style.height / 2 -
                         (cfg.padding[0] - cfg.padding[2]) / 2,
-                    width: 100,
-                    height: 20,
+                    width: 60,
+                    height: 50,
                 },
                 draggable: true,
                 name: 'combo-keyShape',

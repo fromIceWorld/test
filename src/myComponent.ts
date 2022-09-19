@@ -4,11 +4,15 @@ import { CheckDetectChange, Component, Inject, ViewChild } from 'my-world';
     styles: ``,
     template: `
         <div class="menu">
+            <img title="保存数据" class="btn" src='../menu/save.svg' width="20px" @click="cacheData($event)"></img>
+            <img title="恢复数据" class="btn" src='../menu/recovery.svg' width="20px" @click="recoverData($event)"></img>
+            <img title="清除画布" class="btn" src='../menu/clear.svg' width="20px" @click="clearGraph($event)"></img>
             <div class="collapse">
                 <div class="collapse-header" @click="changeCollapse($event)">> form</div>
                     <div *if="coll">
                         <div draggable="true" *forOf="collapses" >
                             <img
+                                &title="item.title"
                                 &src="item.img"
                                 width="20px"
                                 &id="item.id"
@@ -17,9 +21,6 @@ import { CheckDetectChange, Component, Inject, ViewChild } from 'my-world';
                         </div>
                     </div>
             </div>
-            <p @click="exportData($event)">导出数据</p>
-            <p @click="cacheData($event)">保存数据</p>
-            <p @click="recoverData($event)">恢复数据</p>
         </div>
         <div id="drawing-board" #drawing-board style="width: 1920px; height: 1080px"></div>
         <!-- 侧边配置栏 -->
@@ -56,38 +57,35 @@ class MyComponent {
         {
             id: 'input',
             type: 'node',
+            title: '输入框',
             img: '../menu/input.svg',
         },
         {
             id: 'radio',
             type: 'node',
+            title: '单选框',
             img: '../menu/radio.svg',
         },
         {
             id: 'text',
             type: 'node',
+            title: '文本',
             img: '../menu/text.svg',
         },
         {
             id: 'form',
             type: 'combo',
+            title: 'form',
             img: '../menu/form.svg',
         },
         {
             id: 'combination',
             type: 'combo',
+            title: '布局容器',
             img: '../menu/combination.svg',
         },
     ];
     constructor(@Inject(CheckDetectChange) private cd: CheckDetectChange) {}
-    exportData(e) {
-        let innerHTML = this.exportCombo(
-            this.graph.getCombos().filter((combo) => {
-                return combo._cfg.model.parentId === undefined;
-            })[0]
-        );
-        console.log(innerHTML);
-    }
     cacheData() {
         let cache = {
             nodes: this.graph.getNodes().map((node) => {
@@ -114,6 +112,10 @@ class MyComponent {
             this.graph.data(JSON.parse(cache));
             this.graph.render();
         }
+    }
+    clearGraph() {
+        this.graph.data({});
+        this.graph.render();
     }
     exportCombo(combo) {
         let s = '',

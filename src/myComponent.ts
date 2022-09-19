@@ -17,7 +17,9 @@ import { CheckDetectChange, Component, Inject, ViewChild } from 'my-world';
                         </div>
                     </div>
             </div>
-            <span @click="exportData($event)">导出数据</span>
+            <p @click="exportData($event)">导出数据</p>
+            <p @click="cacheData($event)">保存数据</p>
+            <p @click="recoverData($event)">恢复数据</p>
         </div>
         <div id="drawing-board" #drawing-board style="width: 1920px; height: 1080px"></div>
         <!-- 侧边配置栏 -->
@@ -79,10 +81,39 @@ class MyComponent {
     ];
     constructor(@Inject(CheckDetectChange) private cd: CheckDetectChange) {}
     exportData(e) {
-        let innerHTML = this.exportCombo(this.graph.getCombos()[0]);
-        let d = document.createElement('div');
-        d.innerHTML = innerHTML;
-        document.body.append(d);
+        let innerHTML = this.exportCombo(
+            this.graph.getCombos().filter((combo) => {
+                return combo._cfg.model.parentId === undefined;
+            })[0]
+        );
+        console.log(innerHTML);
+    }
+    cacheData() {
+        let cache = {
+            nodes: this.graph.getNodes().map((node) => {
+                return {
+                    ...node._cfg.model,
+                };
+            }),
+            edges: this.graph.getEdges().map((edge) => {
+                return {
+                    ...edge._cfg.model,
+                };
+            }),
+            combos: this.graph.getCombos().map((combo) => {
+                return {
+                    ...combo._cfg.model,
+                };
+            }),
+        };
+        localStorage.setItem('graphData', JSON.stringify(cache));
+    }
+    recoverData() {
+        let cache = localStorage.getItem('graphData');
+        if (cache) {
+            this.graph.data(JSON.parse(cache));
+            this.graph.render();
+        }
     }
     exportCombo(combo) {
         let s = '',
@@ -125,8 +156,9 @@ class MyComponent {
                 elements = nodes.concat(combos);
             if (value.layout == 'row') {
                 // 修改combo layout json
-                this.focusCombo._cfg.model.config.json['flex-direction'] =
-                    'row';
+                this.focusCombo._cfg.model.config.abstract.style[
+                    'flex-direction'
+                ] = 'row';
                 console.log(this.focusCombo._cfg.model);
                 elements.reduce((pre, element) => {
                     const { bboxCanvasCache, model, type } = element._cfg,
@@ -150,8 +182,9 @@ class MyComponent {
                 }, minX);
             } else {
                 // 修改combo layout json
-                this.focusCombo._cfg.model.config.json['flex-direction'] =
-                    'column';
+                this.focusCombo._cfg.model.config.abstract.style[
+                    'flex-direction'
+                ] = 'column';
                 elements.reduce((pre: number, element) => {
                     const { bboxCanvasCache, model, type } = element._cfg,
                         { x } = model,
@@ -324,6 +357,7 @@ class MyComponent {
     }
     graphAddEventListener() {
         const graph = this.graph;
+        window['graph'] = graph;
         graph.on('click', (evt) => {
             const { item } = evt;
             this.focusCombo = item;

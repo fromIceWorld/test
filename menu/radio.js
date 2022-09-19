@@ -40,7 +40,7 @@ G6.registerNode(
         afterDraw(cfg, group) {
             const { config } = cfg,
                 { options } = config.json;
-            renderRadio(group, json, false);
+            renderRadio(group, config.json, false);
             preOptions = options;
         },
         update(cfg, node) {
@@ -119,7 +119,7 @@ class RADIO_CONFIG {
     json = {
         options: JSON.stringify([
             { label: 'A', value: 'A', checked: true },
-            { label: 'B', value: 'B' },
+            { label: 'B', value: 'B', checked: false },
         ]),
     };
     abstract = {
@@ -132,5 +132,20 @@ class RADIO_CONFIG {
         classes: '',
         style: {},
     };
+    render(abstract, json) {
+        const { html, classes, style } = abstract,
+            options = JSON.parse(json.options),
+            name = Math.random();
+        return `${options
+            .map((item) => {
+                return `<input type = 'radio' 
+                               id = "${item.value}" 
+                               ${item.checked ? 'checked' : ''}
+                               name="${name}" 
+                               value = "${item.value}"/> 
+                    <label for="${item.value}">${item.value}</label>`;
+            })
+            .join('\n')}`;
+    }
 }
 configModule['RADIO_CONFIG'] = RADIO_CONFIG;

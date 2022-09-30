@@ -1,4 +1,4 @@
-import { Component } from 'my-world';
+import { Component } from 'mark5';
 @Component({
     selector: `spider2`,
     styles: ``,

@@ -1,4 +1,4 @@
-class COMBINATION_CONFIG {
+class INPUT_BOX_CONFIG {
     json = {};
     abstract = {
         html: {
@@ -16,10 +16,10 @@ class COMBINATION_CONFIG {
         },
     };
 }
-configModule['COMBINATION_CONFIG'] = COMBINATION_CONFIG;
+configModule['INPUT_BOX_CONFIG'] = INPUT_BOX_CONFIG;
 
 G6.registerCombo(
-    'combination',
+    'input_box',
     {
         options: {
             style: {

@@ -66,6 +66,10 @@ class INPUT_CONFIG {
         },
         classes: '',
         style: {},
+        component: {
+            input: ['value'],
+            output: ['change'],
+        },
     };
     render(abstract, json) {
         const { html, classes, style } = abstract;

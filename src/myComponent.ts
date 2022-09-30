@@ -1,12 +1,18 @@
-import { CheckDetectChange, Component, Inject, ViewChild } from 'my-world';
+import { CheckDetectChange, Component, Inject, ViewChild } from 'mark5';
 @Component({
     selector: `#root`,
     styles: ``,
     template: `
         <div class="menu">
-            <img title="保存数据" class="btn" src='../menu/save.svg' width="20px" @click="cacheData($event)"></img>
-            <img title="恢复数据" class="btn" src='../menu/recovery.svg' width="20px" @click="recoverData($event)"></img>
-            <img title="清除画布" class="btn" src='../menu/clear.svg' width="20px" @click="clearGraph($event)"></img>
+            <f-button type="link">
+                <img title="保存数据" class="btn" src='../menu/save.svg' width="20px" @click="cacheData($event)"></img>
+            </f-button>
+            <f-button type="link">
+                <img title="恢复数据" class="btn" src='../menu/recovery.svg' width="20px" @click="recoverData($event)"></img>
+            </f-button>
+            <f-button type="link">
+                <img title="清除画布" class="btn" src='../menu/clear.svg' width="20px" @click="clearGraph($event)"></img>
+            </f-button>
             <div class="collapse">
                 <div class="collapse-header" @click="changeCollapse($event)">> form</div>
                     <div *if="coll">
@@ -23,6 +29,7 @@ import { CheckDetectChange, Component, Inject, ViewChild } from 'my-world';
             </div>
         </div>
         <div id="drawing-board" #drawing-board style="width: 1920px; height: 1080px"></div>
+        <app-diagram &eventNodes = 'eventNodes'></app-diagram>
         <!-- 侧边配置栏 -->
         <div class="config-menu">
             <div class="close">
@@ -47,6 +54,7 @@ class MyComponent {
         nodes: [],
         combos: [],
     };
+    eventNodes = [];
     graph: any;
     focusNode: any = null;
     focusCombo: any = null;
@@ -79,10 +87,16 @@ class MyComponent {
             img: '../menu/form.svg',
         },
         {
-            id: 'combination',
+            id: 'input_box',
             type: 'combo',
             title: '布局容器',
-            img: '../menu/combination.svg',
+            img: '../menu/input-box.svg',
+        },
+        {
+            id: 'button',
+            type: 'node',
+            title: '按钮',
+            img: '../menu/button.svg',
         },
     ];
     constructor(@Inject(CheckDetectChange) private cd: CheckDetectChange) {}
@@ -173,7 +187,7 @@ class MyComponent {
                             minY + centerY - minYY
                         );
                         // 更改comco layout 配置
-                        return width;
+                        return pre + width;
                     } else {
                         element.updatePosition({
                             x: x - minX + pre,
@@ -203,7 +217,7 @@ class MyComponent {
                             minX + x - minXX,
                             pre + centerY - minYY
                         );
-                        return width;
+                        return pre + height;
                     } else {
                         element.updatePosition({
                             x: minX + x - minXX,
@@ -273,6 +287,7 @@ class MyComponent {
         this.cd.detectChanges();
     }
     initBoard() {
+        const snapLine = new G6.SnapLine();
         const width = this.board.scrollWidth,
             height = this.board.scrollHeight || 500,
             graph = new G6.Graph({
@@ -316,7 +331,7 @@ class MyComponent {
                     },
                     // ... 其他配置
                 },
-                plugins: [rightMenu],
+                plugins: [rightMenu, snapLine],
             });
         this.graph = graph;
         graph.data(this.data);
@@ -385,7 +400,13 @@ class MyComponent {
             this.cd.detectChanges();
         });
         graph.on('combo:click', (evt) => {
-            console.log(evt);
+            let { nodes, combos } = evt.item.getChildren();
+            this.eventNodes = [];
+            [].concat(nodes, combos).map((item) => {
+                this.eventNodes.push({ ...item._cfg.model });
+            });
+            console.log(this.eventNodes);
+            this.cd.detectChanges();
         });
         graph.on('node:mouseenter', (evt) => {
             const { item } = evt;
@@ -406,6 +427,7 @@ class MyComponent {
             if (keyCode === 46) {
                 //delete
                 graph.removeItem(this.focusNode);
+                graph.removeItem(this.focusCombo);
                 this.focusNode = null;
             } else if (keyCode >= 37 && keyCode <= 40) {
                 // 左上右下

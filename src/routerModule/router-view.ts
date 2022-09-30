@@ -1,10 +1,4 @@
-import {
-    Component,
-    Inject,
-    TemplateView,
-    TViewFns,
-    TViewIndex,
-} from 'my-world';
+import { Component, Inject, TemplateView, TViewFns, TViewIndex } from 'mark5';
 
 import { Router } from './router';
 

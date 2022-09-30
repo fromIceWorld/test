@@ -8,6 +8,10 @@ export default {
         name: 'block',
     },
     strict: false,
+    external: ['mark5'],
+    globals: {
+        mark5: 'mark5',
+    },
     plugins: [
         resolve(),
         typescript({

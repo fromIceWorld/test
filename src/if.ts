@@ -1,4 +1,4 @@
-import { Directive, Input } from 'my-world';
+import { Directive, Input } from 'mark5';
 @Directive({
     selector: '[if]',
 })

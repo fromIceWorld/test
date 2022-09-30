@@ -10,6 +10,10 @@ class FORM_CONFIG {
             display: 'flex',
             'flex-direction': 'row',
         },
+        component: {
+            input: ['value'],
+            output: ['change'],
+        },
     };
 }
 configModule['FORM_CONFIG'] = FORM_CONFIG;

@@ -1,4 +1,4 @@
-import { Component, Input } from 'my-world';
+import { Component, Input } from 'mark5';
 
 @Component({
     selector: 'router-link',

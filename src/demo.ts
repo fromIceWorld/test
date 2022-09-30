@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from 'my-world';
+import { Component, EventEmitter, Input, Output } from 'mark5';
 @Component({
     selector: `app-demo`,
     template: `

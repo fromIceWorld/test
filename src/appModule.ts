@@ -1,9 +1,11 @@
-import { formsModule, Module } from 'my-world';
+import { formsModule, Module } from 'mark5';
+import { ButtonModule, DialogModule, SelectModule } from 'mark5-ui';
 import { ChilComponent } from './childComponent';
 import { IronComponent } from './components/iron';
 import { SpiderComponent } from './components/spider';
 import { Spider2Component } from './components/spider2';
 import { demoComponent } from './demo';
+import { Diagram } from './diagram';
 import { firstDirective } from './firstDirective';
 import { forof } from './forOf';
 import { bIf } from './if';
@@ -47,9 +49,16 @@ const routes = [
         SpiderComponent,
         Spider2Component,
         TabComponent,
+        Diagram,
     ],
     providers: [{ provide: Router, useClass: Router, deps: [] }],
-    imports: [RouterModule.forRoot(routes), formsModule],
+    imports: [
+        RouterModule.forRoot(routes),
+        formsModule,
+        ButtonModule,
+        SelectModule,
+        DialogModule,
+    ],
     exports: [],
     routes: [
         {

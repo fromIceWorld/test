@@ -1,4 +1,4 @@
-import { Module } from 'my-world';
+import { Module } from 'mark5';
 import { Route } from './Enums/route';
 import { RouterLink } from './router-link';
 import { RouterView } from './router-view';

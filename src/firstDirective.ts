@@ -1,4 +1,4 @@
-import { Directive, elementNode, Input, TemplateView } from 'my-world';
+import { Directive, elementNode, Input, TemplateView } from 'mark5';
 @Directive({
     selector: '[data-angular]',
 })

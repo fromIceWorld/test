@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from 'my-world';
+import { Component, EventEmitter, Input, Output } from 'mark5';
 @Component({
     selector: `app-tab`,
     template: `
@@ -12,7 +12,15 @@ import { Component, EventEmitter, Input, Output } from 'my-world';
         <div class="layout" @click="changeFlex($event)">
             <img title="横向排列" width="15px" src="../menu/Justify_flex-start+row.svg" layout="row"></img>
             <img title="纵向排列" width="15px" layout="col" src='data:image/svg+xml;utf8,<svg t="1662707400560" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="18488" width="200" height="200"><path d="M0 96h1024v64H0V96z m160 512h704v320H160V608zM160 224h704v320H160V224z" p-id="18489"></path></svg>'></img>
-        </div>        
+        </div>  
+        <span class="label">justify-content:</span>
+        <div class="layout" @click="changeFlex($event)">
+            <img width="15px" src="../menu/Justify_space-between+row.svg" ></img>
+            <img width="15px" src="../menu/Justify_center+row.svg"></img>
+            <img width="15px" src="../menu/Direction_row.svg"></img>
+            <img width="15px" src="../menu/Justify_flex-end+row.svg"></img>
+            <img width="15px" src="../menu/Direction_row-reverse.svg"></img>
+        </div>      
     `,
     styles: '',
 })
@@ -33,7 +41,7 @@ class TabComponent {
             });
         }
     }
-    emitUpdate(e, key) {
+    emitUpdate(e, key: any) {
         this.editEvent.emit(false);
         let target = e.target,
             content = this.getContent(target);

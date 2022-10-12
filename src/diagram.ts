@@ -2,11 +2,14 @@ import { CheckDetectChange, Component, Inject, Input, ViewChild } from 'mark5';
 @Component({
     selector: `app-diagram`,
     template: `
+        <!-- 页面图 -->
         <div
             id="relationship"
             #relationship
             style="width: 1920px; height: 1080px;border:1px solid #615b5b49"
         ></div>
+        <!-- 连线图 -->
+        <div id=""></div>
         <!-- 连线弹窗 事件 -->
         <f-dialog
             style="width:400px"

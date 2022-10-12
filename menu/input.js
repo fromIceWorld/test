@@ -68,7 +68,7 @@ class INPUT_CONFIG {
         style: {},
         component: {
             input: ['value'],
-            output: ['change'],
+            output: ['change', 'blur'],
         },
     };
     render(abstract, json) {

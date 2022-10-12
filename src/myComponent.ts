@@ -28,8 +28,20 @@ import { CheckDetectChange, Component, Inject, ViewChild } from 'mark5';
                     </div>
             </div>
         </div>
-        <div id="drawing-board" #drawing-board style="width: 1920px; height: 1080px"></div>
-        <app-diagram &eventNodes = 'eventNodes'></app-diagram>
+        <div id="drawing-board">
+            <img
+                title="切换视图"
+                src="../menu/recovery.svg"
+                width="20px"
+                @click="changeView($event)"
+            ></img>
+            <!-- 页面图 -->
+            <div  id= "design-view" #design-view style="width: 1920px; height: 1080px"
+                &style="{display:tabView == 'design-view' ? 'block' : 'none'}"></div>
+             <!-- 逻辑图 -->
+            <div id="relation-ship" #relation-ship style="width: 1920px; height: 1080px"
+            &style="{display:tabView == 'relation-ship' ? 'block' : 'none'}"></div>
+        </div>
         <!-- 侧边配置栏 -->
         <div class="config-menu">
             <div class="close">
@@ -44,11 +56,39 @@ import { CheckDetectChange, Component, Inject, ViewChild } from 'mark5';
                 </app-tab>
             </div>
         </div>
+         <!-- 连线弹窗 事件 -->
+         <f-dialog
+            style="width:400px"
+            title="对话框"
+            &display="diaDisplay"
+            @OnCancel="cancel($event)"
+        >
+            <div>
+                <span class="label">source:</span>
+                <f-select %="sourceSelect">
+                    <f-option *forOf="sourceList" &value="item">
+                        {{ item }}
+                    </f-option>
+                </f-select>
+            </div>
+            <div>
+                <span class="label">target:</span>
+                <f-select %="targetSelect">
+                    <f-option *forOf="targetList" &value="item">
+                        {{ item }}
+                    </f-option>
+                </f-select>
+            </div>
+            <f-button @click="createEdge($event)">确认</f-button>
+        </f-dialog>
     `,
 })
 class MyComponent {
-    @ViewChild('drawing-board')
+    @ViewChild('design-view')
     board;
+    @ViewChild('relation-ship')
+    relationship;
+    tabView: string = 'design-view';
     dragTarget: EventTarget | null = null;
     data = {
         nodes: [],
@@ -56,11 +96,14 @@ class MyComponent {
     };
     eventNodes = [];
     graph: any;
+    relationshipGraph: any;
     focusNode: any = null;
     focusCombo: any = null;
     jsonOnEdit: boolean = false;
     coll: boolean = true;
     config = [];
+    sourceList = [];
+    targetList = [];
     collapses = [
         {
             id: 'input',
@@ -99,7 +142,23 @@ class MyComponent {
             img: '../menu/button.svg',
         },
     ];
+    newEdge;
+    sourceSelect;
+    targetSelect;
+    diaDisplay: boolean = false;
     constructor(@Inject(CheckDetectChange) private cd: CheckDetectChange) {}
+    changeView(e) {
+        if (this.tabView === 'design-view') {
+            this.tabView = 'relation-ship';
+        } else {
+            this.tabView = 'design-view';
+        }
+        this.cd.detectChanges();
+    }
+    cancel(e) {
+        this.relationshipGraph.removeItem(this.newEdge);
+        this.newEdge = null;
+    }
     cacheData() {
         let cache = {
             nodes: this.graph.getNodes().map((node) => {
@@ -125,6 +184,32 @@ class MyComponent {
         if (cache) {
             this.graph.data(JSON.parse(cache));
             this.graph.render();
+            // 连线图不需要combo和无事件的node
+            const { nodes, combos } = JSON.parse(cache);
+            let relationNodes = nodes;
+            console.log(relationNodes);
+            this.relationshipGraph.data({
+                nodes: [
+                    ...relationNodes.filter(
+                        (node) => node.config.abstract.component
+                    ),
+                    ...combos
+                        .filter(
+                            (combo) =>
+                                combo.config.abstract.component.output.length
+                        )
+                        .map((combo) => {
+                            const { x, y, label, config } = combo;
+                            return {
+                                x,
+                                y,
+                                label,
+                                config,
+                            };
+                        }),
+                ],
+            });
+            this.relationshipGraph.render();
         }
     }
     clearGraph() {
@@ -281,17 +366,50 @@ class MyComponent {
         console.log('%cmyComponent: %cOnInit', 'color:green', 'color:blue');
         this.addGlobalEvent();
         this.initBoard();
+        this.initRelationShip();
     }
     changeCollapse(e) {
         this.coll = !this.coll;
         this.cd.detectChanges();
     }
-    initBoard() {
+    initRelationShip() {
         const snapLine = new G6.SnapLine();
-        const width = this.board.scrollWidth,
-            height = this.board.scrollHeight || 500,
+        const width = 1920,
+            height = 1080,
             graph = new G6.Graph({
-                container: 'drawing-board',
+                container: this.relationship,
+                width,
+                height,
+                defaultNode: {
+                    type: 'rect',
+                    size: [80, 30],
+                },
+                modes: {
+                    default: [
+                        'drag-node',
+                        { type: 'create-edge', key: 'shift' },
+                    ],
+                },
+                defaultEdge: {
+                    type: 'quadratic',
+                    style: {
+                        stroke: '#F6BD16',
+                        lineWidth: 2,
+                        endArrow: true,
+                    },
+                },
+                plugins: [snapLine],
+            });
+        this.relationshipGraph = graph;
+        graph.data(this.data);
+        graph.render();
+        this.relationshipGraphAddEvent();
+    }
+    initBoard() {
+        const width = 1920,
+            height = 1080,
+            graph = new G6.Graph({
+                container: 'design-view',
                 width,
                 height,
                 // translate the graph to align the canvas's center, support by v3.5.1
@@ -331,7 +449,7 @@ class MyComponent {
                     },
                     // ... 其他配置
                 },
-                plugins: [rightMenu, snapLine],
+                plugins: [rightMenu],
             });
         this.graph = graph;
         graph.data(this.data);
@@ -371,6 +489,44 @@ class MyComponent {
             return;
         }
         this.graph.setItemState(item, 'focus', false);
+    }
+    createEdge(e) {
+        this.newEdge.update({
+            ...this.newEdge._cfg.model,
+            label: `${this.sourceSelect}->${this.targetSelect}`,
+        });
+        this.diaDisplay = false;
+        this.cd.detectChanges();
+        console.log(this.diaDisplay);
+    }
+    relationshipGraphAddEvent() {
+        const graph = this.relationshipGraph;
+        // 创建边之前
+        graph.on('aftercreateedge', (e) => {
+            const newEdge = e.edge,
+                { sourceNode, targetNode } = newEdge._cfg,
+                edges = graph.save().edges;
+            console.log(
+                sourceNode,
+                targetNode,
+                sourceNode._cfg.model.config.abstract.component.output
+            );
+            this.sourceList =
+                sourceNode._cfg.model.config.abstract.component.output;
+            this.targetList =
+                targetNode._cfg.model.config.abstract.component.output;
+
+            G6.Util.processParallelEdges(edges);
+            graph.getEdges().forEach((edge, i) => {
+                graph.updateItem(edge, {
+                    curveOffset: edges[i].curveOffset,
+                    curvePosition: edges[i].curvePosition,
+                });
+            });
+            this.newEdge = newEdge;
+            this.diaDisplay = true;
+            this.cd.detectChanges();
+        });
     }
     graphAddEventListener() {
         const graph = this.graph;

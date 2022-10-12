@@ -12,7 +12,7 @@ class FORM_CONFIG {
         },
         component: {
             input: ['value'],
-            output: ['change'],
+            output: ['submit', 'reset'],
         },
     };
 }

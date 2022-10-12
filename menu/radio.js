@@ -132,7 +132,7 @@ class RADIO_CONFIG {
         classes: '',
         style: {},
         component: {
-            input: ['value'],
+            input: ['options'],
             output: ['change'],
         },
     };

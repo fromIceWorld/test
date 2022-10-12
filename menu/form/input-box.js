@@ -12,7 +12,7 @@ class INPUT_BOX_CONFIG {
         },
         component: {
             input: ['value'],
-            output: ['change'],
+            output: [],
         },
     };
 }

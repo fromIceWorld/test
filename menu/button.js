@@ -83,9 +83,13 @@ class BUTTON_CONFIG {
         },
         classes: '',
         style: {},
+        component: {
+            input: [],
+            output: ['click'],
+        },
     };
     render(abstract, json) {
-        const { html, classes, style } = abstract;
+        const { html, classes, style, event } = abstract;
         return `<${html.tagName} type="button" value="${json.name}"></${html.tagName}>`;
     }
 }

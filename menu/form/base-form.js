@@ -15,6 +15,7 @@ class FORM_CONFIG {
             output: ['submit', 'reset'],
         },
     };
+    render() {}
 }
 configModule['FORM_CONFIG'] = FORM_CONFIG;
 G6.registerCombo(

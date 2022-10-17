@@ -19,7 +19,7 @@ G6.registerNode(
             const style = self.getShapeStyle(cfg),
                 width = measureText(text, '14px');
             // 绘制一个矩形作为 keyShape，与 'rect' Combo 的 keyShape 一致
-            rectButton = group.addShape('rect', {
+            return group.addShape('rect', {
                 attrs: {
                     ...style,
                     width: width + 30,
@@ -29,7 +29,6 @@ G6.registerNode(
                 draggable: true,
                 name: 'text-border',
             });
-            return rectButton;
         },
         afterDraw(cfg, group) {
             const { config } = cfg,
@@ -54,9 +53,17 @@ G6.registerNode(
             const { name } = cfg.config.json,
                 textLength = measureText(name, '14px'),
                 group = node.getContainer();
-            let textShape = group.findById('text');
+            let textShape, box;
+            group.find((item) => {
+                if (item.get('name') === 'text-shape') {
+                    textShape = item;
+                }
+                if (item.get('name') === 'text-border') {
+                    box = item;
+                }
+            });
             textShape.attr('text', name);
-            rectButton.attr({
+            box.attr({
                 width: textLength + 30,
             });
         },

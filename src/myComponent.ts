@@ -354,14 +354,14 @@ class MyComponent {
         this.graph.updateItem(this.focusNode, model);
         model.config = config;
         this.graph.updateCombos();
-        // 更新relation图
-        // let target = this.relationshipGraph.findById(model.id);
-        // console.log(target);
-    }
-    // 计算节点新的X节点
-    computedX(x: number, previousLength: number, currentLength: number) {
-        let diff = currentLength - previousLength;
-        return x;
+        // 更新relation图【只有有效节点才更新】
+        let target = this.relationshipGraph.findById(model.id);
+        if (target) {
+            this.graph.updateItem(target, {
+                ...target._cfg.model,
+                config,
+            });
+        }
     }
     OnInit() {
         console.log('%cmyComponent: %cOnInit', 'color:green', 'color:blue');
@@ -506,17 +506,12 @@ class MyComponent {
         graph.on('aftercreateedge', (e) => {
             const newEdge = e.edge,
                 { sourceNode, targetNode } = newEdge._cfg,
+                { input, output } =
+                    sourceNode._cfg.model.config.abstract.component,
                 edges = graph.save().edges;
-            console.log(
-                sourceNode,
-                targetNode,
-                sourceNode._cfg.model.config.abstract.component.output
-            );
-            this.sourceList =
-                sourceNode._cfg.model.config.abstract.component.output;
-            this.targetList =
-                targetNode._cfg.model.config.abstract.component.output;
 
+            this.sourceList = input;
+            this.targetList = output;
             G6.Util.processParallelEdges(edges);
             graph.getEdges().forEach((edge, i) => {
                 graph.updateItem(edge, {
@@ -647,41 +642,31 @@ class MyComponent {
                     // 阻止默认动作（如打开一些元素的链接）
                     event.preventDefault();
                     // 将拖动的元素到所选择的放置目标节点中
+                    const nodeSetting = new configModule[
+                            id.toLocaleUpperCase() + '_CONFIG'
+                        ](),
+                        componentConfig = nodeSetting.abstract.component;
+                    let config = {
+                        x: targetX,
+                        y: targetY,
+                        id: String(Math.random()),
+                        type: id,
+                        config: nodeSetting,
+                    };
                     if (targetType === 'combo') {
-                        const config = {
-                            x: targetX,
-                            y: targetY,
-                            id: String(Math.random()),
+                        Object.assign(config, {
                             label: id,
-                            style: {},
-                            config: new configModule[
-                                id.toLocaleUpperCase() + '_CONFIG'
-                            ](),
-                        };
-                        that.graph.createCombo({ ...config, type: id }, []);
-                        if (config.config.abstract.component.output.length) {
-                            that.relationshipGraph.addItem('node', {
-                                ...config,
-                            });
-                        }
+                        });
+                        that.graph.createCombo({ ...config }, []);
                     } else if (targetType === 'node') {
-                        const config = {
-                            x: targetX,
-                            y: targetY,
-                            type: id,
-                            config: new configModule[
-                                id.toLocaleUpperCase() + '_CONFIG'
-                            ](),
-                            id: String(Math.random()),
-                        };
                         that.graph.addItem('node', {
                             ...config,
                         });
-                        if (config.config.abstract.component.output.length) {
-                            that.relationshipGraph.addItem('node', {
-                                ...config,
-                            });
-                        }
+                    }
+                    if (componentConfig && componentConfig.output.length) {
+                        that.relationshipGraph.addItem('node', {
+                            ...config,
+                        });
                     }
                 }
             },

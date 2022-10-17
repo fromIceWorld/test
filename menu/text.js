@@ -1,10 +1,3 @@
-// 计算节点新的X节点
-function computedX(x, previousLength, currentLength) {
-    let diff = currentLength - previousLength;
-    console.log(x, diff);
-    return x;
-}
-let rectText;
 G6.registerNode(
     'text',
     {
@@ -24,7 +17,7 @@ G6.registerNode(
             const style = self.getShapeStyle(cfg),
                 width = measureText(text, '14px');
             // 绘制一个矩形作为 keyShape，与 'rect' Combo 的 keyShape 一致
-            rectText = group.addShape('rect', {
+            return group.addShape('rect', {
                 attrs: {
                     ...style,
                     width: width + 10,
@@ -34,7 +27,6 @@ G6.registerNode(
                 draggable: true,
                 name: 'text-border',
             });
-            return rectText;
         },
         afterDraw(cfg, group) {
             const { config } = cfg,
@@ -58,10 +50,18 @@ G6.registerNode(
         update(cfg, node) {
             const { text } = cfg.config.json,
                 textLength = measureText(text, '14px'),
-                group = node.getContainer();
-            let textShape = group.findById('text');
+                group = node.get('group');
+            let textShape, box;
+            group.find((item) => {
+                if (item.get('name') === 'text-shape') {
+                    textShape = item;
+                }
+                if (item.get('name') === 'text-border') {
+                    box = item;
+                }
+            });
             textShape.attr('text', text);
-            rectText.attr({
+            box.attr({
                 width: textLength + 10,
             });
         },
@@ -88,6 +88,10 @@ class TEXT_CONFIG {
         },
         classes: '',
         style: {},
+        component: {
+            input: [],
+            output: [],
+        },
     };
     render(abstract, json) {
         const { html, classes, style } = abstract;

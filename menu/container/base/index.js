@@ -15,6 +15,22 @@ class COMBINATION_CONFIG {
             output: ['change'],
         },
     };
+    deepData(parent) {
+        const { nodes, combos } = parent.getChildren();
+        let topNodes = nodes.filter(
+            (node) => node._cfg.model.comboId === parent._cfg.id
+        );
+        let topCombos = combos.filter(
+            (combo) => combo._cfg.model.parentId === parent._cfg.id
+        );
+        const nodesData = topNodes.map((node) =>
+            node._cfg.model.config.render()
+        );
+        const combosData = topCombos.map((combo) =>
+            combo._cfg.model.config.render(combo)
+        );
+        return [...nodesData, ...combosData];
+    }
 }
 configModule['COMBINATION_CONFIG'] = COMBINATION_CONFIG;
 

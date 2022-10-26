@@ -80,6 +80,7 @@ G6.registerNode(
 class TEXT_CONFIG {
     json = {
         text: '姓名',
+        model: '',
     };
     abstract = {
         html: {
@@ -93,9 +94,22 @@ class TEXT_CONFIG {
             output: [],
         },
     };
-    render(abstract, json) {
-        const { html, classes, style } = abstract;
-        return `<${html.tagName}>${json.text}</${html.tagName}>`;
+    render(node) {
+        const { html, classes, style } = this.abstract,
+            json = this.json;
+        return {
+            html: `<${html.tagName}>${json.text}</${html.tagName}>`,
+            data: {},
+            hooks: {
+                fns: [],
+                OnInit: [],
+                OnInputChanges: [],
+                OnViewInit: [],
+                OnViewUpdated: [],
+                OnUpdated: [],
+                OnViewUpdated: [],
+            },
+        };
     }
 }
 configModule['TEXT_CONFIG'] = TEXT_CONFIG;

@@ -95,9 +95,22 @@ class BUTTON_CONFIG {
             output: ['click'],
         },
     };
-    render(abstract, json) {
-        const { html, classes, style, event } = abstract;
-        return `<${html.tagName} type="button" value="${json.name}"></${html.tagName}>`;
+    render(node) {
+        const { html, classes, style, event } = this.abstract,
+            json = this.json;
+        return {
+            html: `<${html.tagName} type="button" value="${json.name}"></${html.tagName}>`,
+            data: {},
+            hooks: {
+                fns: [],
+                OnInit: [],
+                OnInputChanges: [],
+                OnViewInit: [],
+                OnViewUpdated: [],
+                OnUpdated: [],
+                OnViewUpdated: [],
+            },
+        };
     }
 }
 configModule['BUTTON_CONFIG'] = BUTTON_CONFIG;

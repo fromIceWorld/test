@@ -116,6 +116,7 @@ class RADIO_CONFIG {
             { label: 'A', value: 'A', checked: true },
             { label: 'B', value: 'B', checked: false },
         ]),
+        model: '',
     };
     abstract = {
         html: {
@@ -131,20 +132,34 @@ class RADIO_CONFIG {
             output: ['change'],
         },
     };
-    render(abstract, json) {
-        const { html, classes, style } = abstract,
+    render(node) {
+        const { html, classes, style } = this.abstract,
+            json = this.json,
             options = JSON.parse(json.options),
             name = Math.random();
-        return `${options
-            .map((item) => {
-                return `<input type = 'radio' 
-                               id = "${item.value}" 
-                               ${item.checked ? 'checked' : ''}
-                               name="${name}" 
-                               value = "${item.value}"/> 
-                    <label for="${item.value}">${item.value}</label>`;
-            })
-            .join('\n')}`;
+        return {
+            html: `${options
+                .map((item) => {
+                    return `<input type='radio' 
+                                       id="${item.value}" 
+                                       ${item.checked ? 'checked' : ''}
+                                       name="${name}" 
+                                       value="${item.value}"> 
+                            <label for="${item.value}">${item.label}</label>
+                            `;
+                })
+                .join('\n')}`,
+            data: {},
+            hooks: {
+                fns: [],
+                OnInit: [],
+                OnInputChanges: [],
+                OnViewInit: [],
+                OnViewUpdated: [],
+                OnUpdated: [],
+                OnViewUpdated: [],
+            },
+        };
     }
 }
 configModule['RADIO_CONFIG'] = RADIO_CONFIG;

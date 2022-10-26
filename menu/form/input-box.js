@@ -1,4 +1,4 @@
-class INPUT_BOX_CONFIG {
+class INPUT_BOX_CONFIG extends COMBINATION_CONFIG {
     json = {};
     abstract = {
         html: {
@@ -15,6 +15,40 @@ class INPUT_BOX_CONFIG {
             output: [],
         },
     };
+    render(combo) {
+        const json = this.json,
+            abstract = this.abstract,
+            { formData } = json,
+            children = this.deepData(combo);
+        let html = `<div>`;
+        // children 数据
+        children.forEach((child) => {
+            const {
+                html: childHtml,
+                data: childData,
+                hooks: childHooks,
+            } = child;
+            html += `
+                    ${childHtml}`;
+        });
+        html += `
+                </div>`;
+        // 劫持children 中的input
+        let config = {
+            html,
+            data: {},
+            hooks: {
+                fns: [],
+                OnInit: [],
+                OnInputChanges: [],
+                OnViewInit: [],
+                OnViewUpdated: [],
+                OnUpdated: [],
+                OnViewUpdated: [],
+            },
+        };
+        return config;
+    }
 }
 configModule['INPUT_BOX_CONFIG'] = INPUT_BOX_CONFIG;
 

@@ -13,6 +13,9 @@ import { CheckDetectChange, Component, Inject, ViewChild } from 'mark5';
             <f-button type="link">
                 <img title="清除画布" class="btn" src='../menu/clear.svg' width="20px" @click="clearGraph($event)"></img>
             </f-button>
+            <f-button type="link">
+                <img title="导出数据" class="btn" src='../menu/export.svg' width="20px" @click="exportData($event)"></img>
+            </f-button>
             <div class="collapse">
                 <div class="collapse-header" @click="changeCollapse($event)">> form</div>
                     <div *if="coll">
@@ -31,7 +34,7 @@ import { CheckDetectChange, Component, Inject, ViewChild } from 'mark5';
         <div id="drawing-board">
             <img
                 title="切换视图"
-                src="../menu/recovery.svg"
+                &src=" tabView == 'design-view' ? '../menu/view.svg' : '../menu/relation.svg' "
                 width="20px"
                 @click="changeView($event)"
             ></img>
@@ -203,16 +206,30 @@ class MyComponent {
         let cache = localStorage.getItem('graphData');
         if (cache) {
             let { view, relation } = JSON.parse(cache);
-            this.graph.data(view);
-            this.graph.render();
+            this.graph.read(view);
             // 渲染连线图
-            this.relationshipGraph.data(relation);
-            this.relationshipGraph.render();
+            this.relationshipGraph.read(relation);
         }
     }
     clearGraph() {
-        this.graph.data({});
-        this.graph.render();
+        this.graph.read({});
+    }
+    exportData() {
+        const nodes = this.graph.getNodes(),
+            combos = this.graph.getCombos();
+        console.log(nodes, combos);
+        let topNodes = nodes.filter((node) => !node._cfg.model.comboId);
+        let topCombos = combos.filter((combo) => !combo._cfg.model.parentId);
+        console.log(topNodes, topCombos);
+        const nodesData = topNodes.map((node) =>
+            node._cfg.model.config.render()
+        );
+        const combosData = topCombos.map((combo) =>
+            combo._cfg.model.config.render(combo)
+        );
+
+        console.log(nodesData, combosData);
+        console.log(this.relationshipGraph.save());
     }
     exportCombo(combo) {
         let s = '',
@@ -344,23 +361,35 @@ class MyComponent {
         });
     }
     updateNode(e) {
-        const model = this.focusNode._cfg.model,
+        let target = this.focusCombo ? 'focusCombo' : 'focusNode';
+        const model = this[target]._cfg.model,
             config = model.config,
             json = model.config.json;
         let { dom, value } = e.detail,
             { json: newJson } = value;
         Object.assign(json, newJson);
-        console.log('更新前：', this.focusNode.getBBox());
-        this.graph.updateItem(this.focusNode, model);
-        model.config = config;
-        this.graph.updateCombos();
-        // 更新relation图【只有有效节点才更新】
-        let target = this.relationshipGraph.findById(model.id);
-        if (target) {
-            this.graph.updateItem(target, {
-                ...target._cfg.model,
-                config,
-            });
+        console.log(config);
+        // 节点需要更新 view
+        if (this.focusNode) {
+            // 更新图
+            let relationTarget = this.relationshipGraph.findById(model.id);
+            if (this.focusNode) {
+                this.graph.updateItem(this.focusNode, {
+                    ...this.focusNode._cfg.model,
+                    config,
+                });
+                // 节点更新数据后，config变成一个普通的对象，丢失了class 的 原型链
+                this.graph.findById(model.id)._cfg.model.config = config;
+            }
+            if (relationTarget) {
+                this.relationshipGraph.updateItem(relationTarget, {
+                    ...relationTarget._cfg.model,
+                    config,
+                });
+                this.relationshipGraph.findById(model.id)._cfg.model.config =
+                    config;
+            }
+            this.graph.updateCombos();
         }
     }
     OnInit() {
@@ -402,8 +431,7 @@ class MyComponent {
                 plugins: [snapLine],
             });
         this.relationshipGraph = graph;
-        graph.data(this.data);
-        graph.render();
+        graph.read(this.data);
         this.relationshipGraphAddEvent();
     }
     initBoard() {
@@ -453,8 +481,7 @@ class MyComponent {
                 plugins: [rightMenu],
             });
         this.graph = graph;
-        graph.data(this.data);
-        graph.render();
+        graph.read(this.data);
         this.graphAddEventListener();
     }
     OnInputChanges(changesObj: any) {
@@ -506,12 +533,14 @@ class MyComponent {
         graph.on('aftercreateedge', (e) => {
             const newEdge = e.edge,
                 { sourceNode, targetNode } = newEdge._cfg,
-                { input, output } =
+                { output: sourceOutput } =
                     sourceNode._cfg.model.config.abstract.component,
+                { output: targetOutput } =
+                    targetNode._cfg.model.config.abstract.component,
                 edges = graph.save().edges;
 
-            this.sourceList = input;
-            this.targetList = output;
+            this.sourceList = sourceOutput;
+            this.targetList = targetOutput;
             G6.Util.processParallelEdges(edges);
             graph.getEdges().forEach((edge, i) => {
                 graph.updateItem(edge, {
@@ -558,6 +587,10 @@ class MyComponent {
                 this.eventNodes.push({ ...item._cfg.model });
             });
             console.log(this.eventNodes);
+            // 展示combo  json 数据
+            const { item } = evt,
+                json = item._cfg.model.config.json;
+            this.config = [json];
             this.cd.detectChanges();
         });
         graph.on('node:mouseenter', (evt) => {

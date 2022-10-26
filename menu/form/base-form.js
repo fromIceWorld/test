@@ -1,5 +1,5 @@
-class FORM_CONFIG {
-    json = {};
+class FORM_CONFIG extends COMBINATION_CONFIG {
+    json = { formData: 'fg' };
     abstract = {
         html: {
             tagName: 'div',
@@ -15,7 +15,42 @@ class FORM_CONFIG {
             output: ['submit', 'reset'],
         },
     };
-    render() {}
+    render(combo) {
+        const json = this.json,
+            abstract = this.abstract,
+            { formData } = json,
+            children = this.deepData(combo);
+        let html = `<div &formgroup="${formData}">`;
+        // children 数据
+        children.forEach((child) => {
+            const {
+                html: childHtml,
+                data: childData,
+                hooks: childHooks,
+            } = child;
+            html += `
+                    ${childHtml}`;
+        });
+        html += `
+                </div>`;
+        // 劫持children 中的input
+        let config = {
+            html,
+            data: {
+                [formData]: null,
+            },
+            hooks: {
+                fns: [],
+                OnInit: [],
+                OnInputChanges: [],
+                OnViewInit: [],
+                OnViewUpdated: [],
+                OnUpdated: [],
+                OnViewUpdated: [],
+            },
+        };
+        return config;
+    }
 }
 configModule['FORM_CONFIG'] = FORM_CONFIG;
 G6.registerCombo(

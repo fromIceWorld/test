@@ -40,6 +40,7 @@ G6.registerNode(
             });
         },
         update(cfg, node) {
+            console.log('input update', cfg);
             const { json } = cfg.config,
                 { placeholder } = json,
                 group = node.getContainer();
@@ -56,7 +57,7 @@ G6.registerNode(
     'rect'
 );
 class INPUT_CONFIG {
-    json = { placeholder: '请输入' };
+    json = { placeholder: '请输入', model: '' };
     abstract = {
         html: {
             tagName: 'input',
@@ -71,9 +72,28 @@ class INPUT_CONFIG {
             output: ['change', 'blur'],
         },
     };
-    render(abstract, json) {
-        const { html, classes, style } = abstract;
-        return `<${html.tagName} placeholder = "${json.placeholder}"></${html.tagName}>`;
+    render(node) {
+        const { html, classes, style } = this.abstract,
+            { tagName, attributes } = html,
+            json = this.json;
+        let data = {
+            html: `<${tagName} 
+                        type="${attributes.type}"
+                        placeholder="${json.placeholder}"
+                        ${json.model ? '%="' + json.model + '"' : ''}
+                   ></${tagName}>`,
+            data: {},
+            hooks: {
+                fns: [],
+                OnInit: [],
+                OnInputChanges: [],
+                OnViewInit: [],
+                OnViewUpdated: [],
+                OnUpdated: [],
+                OnViewUpdated: [],
+            },
+        };
+        return data;
     }
 }
 configModule['INPUT_CONFIG'] = INPUT_CONFIG;

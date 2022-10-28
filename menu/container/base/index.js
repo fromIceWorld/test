@@ -1,35 +1,15 @@
 class COMBINATION_CONFIG {
-    json = {};
-    abstract = {
-        html: {
-            tagName: 'div',
-            attributes: {},
-        },
-        classes: '',
-        style: {
-            display: 'flex',
-            'flex-direction': 'row',
-        },
-        component: {
-            input: ['value'],
-            output: ['change'],
-        },
-    };
-    deepData(parent) {
-        const { nodes, combos } = parent.getChildren();
-        let topNodes = nodes.filter(
-            (node) => node._cfg.model.comboId === parent._cfg.id
-        );
-        let topCombos = combos.filter(
-            (combo) => combo._cfg.model.parentId === parent._cfg.id
-        );
-        const nodesData = topNodes.map((node) =>
-            node._cfg.model.config.render()
-        );
-        const combosData = topCombos.map((combo) =>
-            combo._cfg.model.config.render(combo)
-        );
-        return [...nodesData, ...combosData];
+    getNextChildren(combo) {
+        const { nodes, combos } = combo.getChildren(),
+            id = combo._cfg.id;
+        let childNodes = nodes.filter((node) => node._cfg.model.comboId === id),
+            childCombos = combos.filter(
+                (combo) => combo._cfg.model.parentId === id
+            );
+        return {
+            nodes: childNodes,
+            combos: childCombos,
+        };
     }
 }
 configModule['COMBINATION_CONFIG'] = COMBINATION_CONFIG;

@@ -15,30 +15,48 @@ class FORM_CONFIG extends COMBINATION_CONFIG {
             output: ['submit', 'reset'],
         },
     };
+    renderConfig = {
+        abductees: [],
+        config: null,
+    };
+    /**
+     * 劫持 node/combo实例，内部携带层级关系
+     *
+     * @param {*} combo
+     * @returns
+     */
+    markAsHijack(combo) {
+        const { nodes, combos } = this.getNextChildren(combo);
+        let q = [...nodes, ...combos];
+        while (q.length) {
+            const sub = q.shift();
+            // node
+            if (sub instanceof NODE_CONFIG) {
+                let { abstract, status } = sub;
+                const { html } = abstract,
+                    { tagName } = html;
+                if (!status.hijack && tagName === 'input') {
+                    // 记录 劫持的node
+                    status.hijack = combo._cfg.model.config;
+                    this.renderConfig.abductees.push(sub._cfg.model.config);
+                } else if (sub instanceof COMBINATION_CONFIG) {
+                    // 向下查找可劫持组件
+                    const { nodes: nextNodes, combos: nextCombos } =
+                        this.getNextChildren(sub);
+                    q.push(...nextNodes, ...nextCombos);
+                }
+            }
+        }
+    }
+
+    // 返回combo节点渲染data
     render(combo) {
-        const json = this.json,
-            abstract = this.abstract,
-            { formData } = json,
-            children = this.deepData(combo);
-        let html = `<div &formgroup="${formData}">`;
-        // children 数据
-        children.forEach((child) => {
-            const {
-                html: childHtml,
-                data: childData,
-                hooks: childHooks,
-            } = child;
-            html += `
-                    ${childHtml}`;
-        });
-        html += `
-                </div>`;
-        // 劫持children 中的input
+        if (this.renderConfig.config) {
+            return this.renderConfig.config;
+        }
         let config = {
-            html,
-            data: {
-                [formData]: null,
-            },
+            html: `<div>`,
+            data: {},
             hooks: {
                 fns: [],
                 OnInit: [],
@@ -49,6 +67,16 @@ class FORM_CONFIG extends COMBINATION_CONFIG {
                 OnViewUpdated: [],
             },
         };
+        const { nodes: nextNodes, combos: nextCombos } =
+            this.getNextChildren(combo);
+        let childConfig = [...nextNodes, ...nextCombos].map((next) =>
+            next._cfg.model.config.render(next)
+        );
+        childConfig.forEach((child) => {
+            const { html, data, hooks } = child;
+            config.html += html;
+        });
+        config.html += `</div>`;
         return config;
     }
 }

@@ -221,15 +221,13 @@ class MyComponent {
         let topNodes = nodes.filter((node) => !node._cfg.model.comboId);
         let topCombos = combos.filter((combo) => !combo._cfg.model.parentId);
         console.log(topNodes, topCombos);
-        const nodesData = topNodes.map((node) =>
-            node._cfg.model.config.render()
+        topCombos.forEach((combo) => {
+            combo._cfg.model.config.markAsHijack(combo);
+        });
+        const renderConfig = [...topNodes, ...topCombos].map((item) =>
+            item._cfg.model.config.render(item)
         );
-        const combosData = topCombos.map((combo) =>
-            combo._cfg.model.config.render(combo)
-        );
-
-        console.log(nodesData, combosData);
-        console.log(this.relationshipGraph.save());
+        console.log(renderConfig);
     }
     exportCombo(combo) {
         let s = '',

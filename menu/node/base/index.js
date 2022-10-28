@@ -1,0 +1,1 @@
+class NODE_CONFIG {}

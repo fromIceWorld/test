@@ -15,27 +15,10 @@ class INPUT_BOX_CONFIG extends COMBINATION_CONFIG {
             output: [],
         },
     };
+    markAsHijack() {}
     render(combo) {
-        const json = this.json,
-            abstract = this.abstract,
-            { formData } = json,
-            children = this.deepData(combo);
-        let html = `<div>`;
-        // children 数据
-        children.forEach((child) => {
-            const {
-                html: childHtml,
-                data: childData,
-                hooks: childHooks,
-            } = child;
-            html += `
-                    ${childHtml}`;
-        });
-        html += `
-                </div>`;
-        // 劫持children 中的input
         let config = {
-            html,
+            html: `<div>`,
             data: {},
             hooks: {
                 fns: [],
@@ -47,6 +30,16 @@ class INPUT_BOX_CONFIG extends COMBINATION_CONFIG {
                 OnViewUpdated: [],
             },
         };
+        const { nodes: nextNodes, combos: nextCombos } =
+            this.getNextChildren(combo);
+        let childConfig = [...nextNodes, ...nextCombos].map((next) =>
+            next._cfg.model.config.render(next)
+        );
+        childConfig.forEach((child) => {
+            const { html, data, hooks } = child;
+            config.html += html;
+        });
+        config.html += `</div>`;
         return config;
     }
 }

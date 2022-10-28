@@ -77,7 +77,7 @@ G6.registerNode(
 );
 
 // 独属于每一个节点的render函数，在G6中会被抹除，通过原型保存
-class TEXT_CONFIG {
+class TEXT_CONFIG extends NODE_CONFIG {
     json = {
         text: '姓名',
         model: '',
@@ -95,9 +95,10 @@ class TEXT_CONFIG {
         },
     };
     render(node) {
-        const { html, classes, style } = this.abstract,
+        const base = node._cfg.model.config,
+            { html, classes, style } = this.abstract,
             json = this.json;
-        return {
+        let config = {
             html: `<${html.tagName}>${json.text}</${html.tagName}>`,
             data: {},
             hooks: {
@@ -110,6 +111,7 @@ class TEXT_CONFIG {
                 OnViewUpdated: [],
             },
         };
+        return config;
     }
 }
 configModule['TEXT_CONFIG'] = TEXT_CONFIG;

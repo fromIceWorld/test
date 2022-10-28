@@ -1,4 +1,3 @@
-let rectButton;
 G6.registerNode(
     'button',
     {
@@ -79,7 +78,7 @@ G6.registerNode(
 );
 
 // 独属于每一个节点的render函数，在G6中会被抹除，通过原型保存
-class BUTTON_CONFIG {
+class BUTTON_CONFIG extends NODE_CONFIG {
     json = {
         name: '姓名',
     };
@@ -96,9 +95,10 @@ class BUTTON_CONFIG {
         },
     };
     render(node) {
-        const { html, classes, style, event } = this.abstract,
+        const base = node._cfg.model.config,
+            { html, classes, style, event } = this.abstract,
             json = this.json;
-        return {
+        let config = {
             html: `<${html.tagName} type="button" value="${json.name}"></${html.tagName}>`,
             data: {},
             hooks: {
@@ -111,6 +111,7 @@ class BUTTON_CONFIG {
                 OnViewUpdated: [],
             },
         };
+        return config;
     }
 }
 configModule['BUTTON_CONFIG'] = BUTTON_CONFIG;

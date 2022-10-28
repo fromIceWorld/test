@@ -110,7 +110,7 @@ function computedWidth(optionsString) {
     }, 0);
     return width;
 }
-class RADIO_CONFIG {
+class RADIO_CONFIG extends NODE_CONFIG {
     json = {
         options: JSON.stringify([
             { label: 'A', value: 'A', checked: true },
@@ -133,11 +133,12 @@ class RADIO_CONFIG {
         },
     };
     render(node) {
-        const { html, classes, style } = this.abstract,
+        const base = node._cfg.model.config,
+            { html, classes, style } = this.abstract,
             json = this.json,
             options = JSON.parse(json.options),
             name = Math.random();
-        return {
+        let config = {
             html: `${options
                 .map((item) => {
                     return `<input type='radio' 
@@ -160,6 +161,7 @@ class RADIO_CONFIG {
                 OnViewUpdated: [],
             },
         };
+        return config;
     }
 }
 configModule['RADIO_CONFIG'] = RADIO_CONFIG;

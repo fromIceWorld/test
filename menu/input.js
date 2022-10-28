@@ -56,8 +56,8 @@ G6.registerNode(
     },
     'rect'
 );
-class INPUT_CONFIG {
-    json = { placeholder: '请输入', model: '' };
+class INPUT_CONFIG extends NODE_CONFIG {
+    json = { placeholder: '请输入', model: '', regexp: '' };
     abstract = {
         html: {
             tagName: 'input',
@@ -72,11 +72,16 @@ class INPUT_CONFIG {
             output: ['change', 'blur'],
         },
     };
+    status = {
+        hijack: null,
+    };
+    // 返回node节点渲染data，和 base config
     render(node) {
-        const { html, classes, style } = this.abstract,
+        const base = node._cfg.model.config,
+            { html, classes, style } = this.abstract,
             { tagName, attributes } = html,
             json = this.json;
-        let data = {
+        let config = {
             html: `<${tagName} 
                         type="${attributes.type}"
                         placeholder="${json.placeholder}"
@@ -93,7 +98,7 @@ class INPUT_CONFIG {
                 OnViewUpdated: [],
             },
         };
-        return data;
+        return config;
     }
 }
 configModule['INPUT_CONFIG'] = INPUT_CONFIG;

@@ -94,7 +94,17 @@ class TEXT_CONFIG extends NODE_CONFIG {
             output: [],
         },
     };
+    renderConfig = {
+        abductees: [],
+        config: null,
+    };
+    status = {
+        hijack: false,
+    };
     render(node) {
+        if (this.renderConfig.config) {
+            return this.renderConfig.config;
+        }
         const base = node._cfg.model.config,
             { html, classes, style } = this.abstract,
             json = this.json;

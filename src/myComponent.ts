@@ -16,6 +16,12 @@ import { CheckDetectChange, Component, Inject, ViewChild } from 'mark5';
             <f-button type="link">
                 <img title="导出数据" class="btn" src='../menu/export.svg' width="20px" @click="exportData($event)"></img>
             </f-button>
+            <img
+                title="切换视图"
+                &src=" tabView == 'design-view' ? '../menu/view.svg' : '../menu/relation.svg' "
+                width="20px"
+                @click="changeView($event)"
+            ></img>
             <div class="collapse">
                 <div class="collapse-header" @click="changeCollapse($event)">> form</div>
                     <div *if="coll">
@@ -31,13 +37,8 @@ import { CheckDetectChange, Component, Inject, ViewChild } from 'mark5';
                     </div>
             </div>
         </div>
+        
         <div id="drawing-board">
-            <img
-                title="切换视图"
-                &src=" tabView == 'design-view' ? '../menu/view.svg' : '../menu/relation.svg' "
-                width="20px"
-                @click="changeView($event)"
-            ></img>
             <!-- 页面图 -->
             <div  id= "design-view" #design-view style="width: 1920px; height: 1080px"
                 &style="{display:tabView == 'design-view' ? 'block' : 'none'}"></div>
@@ -94,7 +95,10 @@ class MyComponent {
     tabView: string = 'design-view';
     dragTarget: EventTarget | null = null;
     data = {
-        nodes: [],
+        nodes: [
+            { id: '1', type: 'scaleX', x: 0, y: 0 },
+            { id: '2', type: 'scaleY', x: 0, y: 0 },
+        ],
         combos: [],
     };
     eventNodes = [];
@@ -221,9 +225,11 @@ class MyComponent {
         let topNodes = nodes.filter((node) => !node._cfg.model.comboId);
         let topCombos = combos.filter((combo) => !combo._cfg.model.parentId);
         console.log(topNodes, topCombos);
+        // 标记 组件间的劫持关系
         topCombos.forEach((combo) => {
             combo._cfg.model.config.markAsHijack(combo);
         });
+        // 输出组件 template， data， js
         const renderConfig = [...topNodes, ...topCombos].map((item) =>
             item._cfg.model.config.render(item)
         );
@@ -433,6 +439,7 @@ class MyComponent {
         this.relationshipGraphAddEvent();
     }
     initBoard() {
+        const snapLine = new G6.SnapLine();
         const width = 1920,
             height = 1080,
             graph = new G6.Graph({
@@ -476,7 +483,7 @@ class MyComponent {
                     },
                     // ... 其他配置
                 },
-                plugins: [rightMenu],
+                plugins: [rightMenu, snapLine],
             });
         this.graph = graph;
         graph.read(this.data);

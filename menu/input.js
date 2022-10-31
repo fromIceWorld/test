@@ -57,7 +57,7 @@ G6.registerNode(
     'rect'
 );
 class INPUT_CONFIG extends NODE_CONFIG {
-    json = { placeholder: '请输入', model: '', regexp: '' };
+    json = { placeholder: '请输入姓名', model: 'name', regexp: '' };
     abstract = {
         html: {
             tagName: 'input',
@@ -72,11 +72,18 @@ class INPUT_CONFIG extends NODE_CONFIG {
             output: ['change', 'blur'],
         },
     };
+    renderConfig = {
+        abductees: [],
+        config: null,
+    };
     status = {
-        hijack: null,
+        hijack: false,
     };
     // 返回node节点渲染data，和 base config
     render(node) {
+        if (this.renderConfig.config) {
+            return this.renderConfig.config;
+        }
         const base = node._cfg.model.config,
             { html, classes, style } = this.abstract,
             { tagName, attributes } = html,
@@ -98,6 +105,7 @@ class INPUT_CONFIG extends NODE_CONFIG {
                 OnViewUpdated: [],
             },
         };
+        this.renderConfig.config = config;
         return config;
     }
 }

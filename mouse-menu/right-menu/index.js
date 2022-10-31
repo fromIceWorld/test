@@ -69,7 +69,6 @@ function clone(item) {
             ]
         );
     } else if (type === 'node') {
-        console.log(model);
         const id = String(Math.random());
         const node = graph.addItem('node', {
             ...model,

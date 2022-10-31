@@ -15,8 +15,18 @@ class INPUT_BOX_CONFIG extends COMBINATION_CONFIG {
             output: [],
         },
     };
+    renderConfig = {
+        abductees: [],
+        config: null,
+    };
+    status = {
+        hijack: false,
+    };
     markAsHijack() {}
     render(combo) {
+        if (this.renderConfig.config) {
+            return this.renderConfig.config;
+        }
         let config = {
             html: `<div>`,
             data: {},

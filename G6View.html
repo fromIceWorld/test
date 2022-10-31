@@ -231,7 +231,6 @@
                 isEdit = true;
             });
             valueNative.addEventListener('blur', (e) => {
-                console.log(model);
                 json[key] = Array.from(valueNative.childNodes)
                     .map((text) => text.nodeValue)
                     .join('');

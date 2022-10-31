@@ -80,12 +80,14 @@ G6.registerNode(
 // 独属于每一个节点的render函数，在G6中会被抹除，通过原型保存
 class BUTTON_CONFIG extends NODE_CONFIG {
     json = {
-        name: '姓名',
+        name: '确定',
     };
     abstract = {
         html: {
             tagName: 'input',
-            attributes: {},
+            attributes: {
+                type: 'button',
+            },
         },
         classes: '',
         style: {},
@@ -94,7 +96,17 @@ class BUTTON_CONFIG extends NODE_CONFIG {
             output: ['click'],
         },
     };
+    renderConfig = {
+        abductees: [],
+        config: null,
+    };
+    status = {
+        hijack: false,
+    };
     render(node) {
+        if (this.renderConfig.config) {
+            return this.renderConfig.config;
+        }
         const base = node._cfg.model.config,
             { html, classes, style, event } = this.abstract,
             json = this.json;
@@ -111,6 +123,7 @@ class BUTTON_CONFIG extends NODE_CONFIG {
                 OnViewUpdated: [],
             },
         };
+        this.renderConfig.config = config;
         return config;
     }
 }

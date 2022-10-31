@@ -19,6 +19,9 @@ class FORM_CONFIG extends COMBINATION_CONFIG {
         abductees: [],
         config: null,
     };
+    status = {
+        hijack: false,
+    };
     /**
      * 劫持 node/combo实例，内部携带层级关系
      *
@@ -26,37 +29,97 @@ class FORM_CONFIG extends COMBINATION_CONFIG {
      * @returns
      */
     markAsHijack(combo) {
+        if (this.renderConfig.abductees.length) {
+            return;
+        }
         const { nodes, combos } = this.getNextChildren(combo);
         let q = [...nodes, ...combos];
         while (q.length) {
             const sub = q.shift();
             // node
-            if (sub instanceof NODE_CONFIG) {
-                let { abstract, status } = sub;
+            if (sub._cfg.type === 'node') {
+                let { abstract, status } = sub._cfg.model.config;
                 const { html } = abstract,
-                    { tagName } = html;
-                if (!status.hijack && tagName === 'input') {
+                    { tagName, attributes } = html;
+                if (
+                    !status.hijack &&
+                    tagName === 'input' &&
+                    attributes.type === 'text'
+                ) {
                     // 记录 劫持的node
-                    status.hijack = combo._cfg.model.config;
+                    status.hijack = true;
                     this.renderConfig.abductees.push(sub._cfg.model.config);
-                } else if (sub instanceof COMBINATION_CONFIG) {
-                    // 向下查找可劫持组件
-                    const { nodes: nextNodes, combos: nextCombos } =
-                        this.getNextChildren(sub);
-                    q.push(...nextNodes, ...nextCombos);
                 }
+            } else if (sub._cfg.type === 'combo') {
+                // 向下查找可劫持组件
+                const { nodes: nextNodes, combos: nextCombos } =
+                    this.getNextChildren(sub);
+                q.push(...nextNodes, ...nextCombos);
             }
         }
     }
-
     // 返回combo节点渲染data
     render(combo) {
         if (this.renderConfig.config) {
             return this.renderConfig.config;
         }
+        const formGroup = {},
+            { json, abstract } = combo._cfg.model.config,
+            { formData } = json;
+        // 处理 劫持的 node
+        this.renderConfig.abductees.forEach((config) => {
+            const {
+                    json: childJson,
+                    abstract: childAbstract,
+                    renderConfig,
+                } = config,
+                { html, classes, style } = childAbstract,
+                { tagName, attributes } = html;
+            let htmlString = ``;
+            // 劫持 text 输入框
+            if (attributes.type === 'text') {
+                htmlString += `<${tagName} class="${classes}" placeholder='${childJson.placeholder}'`;
+                for (let [key, value] of Object.entries(style)) {
+                    htmlString += ` ${key}="${value}"`;
+                }
+                for (let [key, value] of Object.entries(attributes)) {
+                    htmlString += ` ${key}="${value}"`;
+                }
+                // 添加劫持后的数据
+                if (childJson.model) {
+                    const model = childJson.model;
+                    htmlString += ` [formcontrol]="${model}"`;
+                    formGroup[model] = {
+                        regexp: '',
+                    };
+                }
+                // 闭合
+                htmlString += `></input>`;
+            } else if (attributes.type === 'radio') {
+                const { options } = childJson;
+                htmlString = `${JSON.parse(options)
+                    .map((item) => {
+                        return `<input type='radio' 
+                                           id="${item.value}" 
+                                           ${item.checked ? 'checked' : ''}
+                                           name="first" 
+                                           value="${item.value}"></input> 
+                                <label for="${item.value}">${item.label}</label>
+                                `;
+                    })
+                    .join('')}`;
+            }
+            renderConfig.config = {
+                html: htmlString,
+                data: {},
+                hooks: {},
+            };
+        });
         let config = {
             html: `<div>`,
-            data: {},
+            data: {
+                [formData]: formGroup,
+            },
             hooks: {
                 fns: [],
                 OnInit: [],

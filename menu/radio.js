@@ -113,10 +113,10 @@ function computedWidth(optionsString) {
 class RADIO_CONFIG extends NODE_CONFIG {
     json = {
         options: JSON.stringify([
-            { label: 'A', value: 'A', checked: true },
-            { label: 'B', value: 'B', checked: false },
+            { label: '男', value: '男', checked: true },
+            { label: '女', value: '女', checked: false },
         ]),
-        model: '',
+        model: 'sex',
     };
     abstract = {
         html: {
@@ -132,7 +132,17 @@ class RADIO_CONFIG extends NODE_CONFIG {
             output: ['change'],
         },
     };
+    renderConfig = {
+        abductees: [],
+        config: null,
+    };
+    status = {
+        hijack: false,
+    };
     render(node) {
+        if (this.renderConfig.config) {
+            return this.renderConfig.config;
+        }
         const base = node._cfg.model.config,
             { html, classes, style } = this.abstract,
             json = this.json,
@@ -161,6 +171,7 @@ class RADIO_CONFIG extends NODE_CONFIG {
                 OnViewUpdated: [],
             },
         };
+        this.renderConfig.config = config;
         return config;
     }
 }

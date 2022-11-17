@@ -1,8 +1,32 @@
+class FormGroup {
+    constructor(controls) {
+        for (let [key, config] of Object.entries(controls)) {
+            this[key] = config;
+            config['group'] = this;
+        }
+    }
+    get(key) {
+        const { value } = this[key];
+        return value;
+    }
+    subs = [];
+    subscribe(fn) {
+        this.subs.push(fn);
+    }
+    change(key, value) {
+        console.log(key, value);
+        this.subs.forEach((fn) => {
+            this[key].value = value;
+            let valid = new RegExp(this[key].regexp).test(value);
+            fn(key, value, valid);
+        });
+    }
+}
 class FORM_CONFIG extends COMBINATION_CONFIG {
     json = { formData: 'fg' };
     abstract = {
         html: {
-            tagName: 'div',
+            tagName: 'form',
             attributes: {},
         },
         classes: '',
@@ -88,10 +112,12 @@ class FORM_CONFIG extends COMBINATION_CONFIG {
                 // 添加劫持后的数据
                 if (childJson.model) {
                     const model = childJson.model;
-                    htmlString += ` [formcontrol]="${model}"`;
-                    formGroup[model] = {
-                        regexp: '',
-                    };
+                    htmlString += ` &formcontrol="${formData}.${model}"`;
+                    formGroup[model] = `${JSON.stringify({
+                        name: model,
+                        value: '',
+                        regexp: childJson.regexp,
+                    })}`;
                 }
                 // 闭合
                 htmlString += `></input>`;
@@ -116,9 +142,9 @@ class FORM_CONFIG extends COMBINATION_CONFIG {
             };
         });
         let config = {
-            html: `<div>`,
+            html: `<form &formgroup="${formData}">`,
             data: {
-                [formData]: formGroup,
+                [formData]: `new FormGroup(${JSON.stringify(formGroup)})`,
             },
             hooks: {
                 fns: [],
@@ -129,6 +155,7 @@ class FORM_CONFIG extends COMBINATION_CONFIG {
                 OnUpdated: [],
                 OnViewUpdated: [],
             },
+            imports: [FormGroup],
         };
         const { nodes: nextNodes, combos: nextCombos } =
             this.getNextChildren(combo);
@@ -138,8 +165,9 @@ class FORM_CONFIG extends COMBINATION_CONFIG {
         childConfig.forEach((child) => {
             const { html, data, hooks } = child;
             config.html += html;
+            Object.assign(config.data, data);
         });
-        config.html += `</div>`;
+        config.html += `</form>`;
         return config;
     }
 }

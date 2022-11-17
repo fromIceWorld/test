@@ -11,20 +11,20 @@ G6.registerNode(
         draw(cfg, group) {
             group.addShape('rect', {
                 attrs: {
-                    width: 1920,
+                    width: 1942,
                     fill: 'black',
                     height: 22,
                 },
                 draggable: true,
                 name: 'text-border',
             });
-            for (let i = 0; i < 1920; i++) {
+            for (let i = 0; i < 1942; i++) {
                 if (i % 10 === 0) {
                     group.addShape('text', {
                         attrs: {
                             text: '|',
-                            x: i + 23,
-                            y: 15,
+                            x: i + 21,
+                            y: 17,
                             fontSize: 10,
                             textAlign: 'left',
                             textBaseline: 'middle',
@@ -39,8 +39,8 @@ G6.registerNode(
                     group.addShape('text', {
                         attrs: {
                             text: i % 20 === 0 ? '|' : '',
-                            x: i + 23,
-                            y: 5,
+                            x: i + 21,
+                            y: 7,
                             fontSize: 10,
                             textAlign: 'left',
                             textBaseline: 'middle',
@@ -52,8 +52,8 @@ G6.registerNode(
                     group.addShape('text', {
                         attrs: {
                             text: i,
-                            x: i + 28,
-                            y: 7,
+                            x: i + 26,
+                            y: 8,
                             fontSize: 10,
                             textAlign: 'left',
                             textBaseline: 'middle',

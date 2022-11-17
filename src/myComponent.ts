@@ -1,4 +1,5 @@
 import { CheckDetectChange, Component, Inject, ViewChild } from 'mark5';
+
 @Component({
     selector: `#root`,
     styles: ``,
@@ -38,9 +39,13 @@ import { CheckDetectChange, Component, Inject, ViewChild } from 'mark5';
             </div>
         </div>
         
-        <div id="drawing-board">
+        <div id="drawing-board" style="position:relative">
+            <!-- scaleX -->
+            <div id="scaleX" #scaleX style="position: absolute;"></div>
+            <!-- scaleY -->
+            <div id="scaleY" #scaleY style="position: absolute;"></div>
             <!-- 页面图 -->
-            <div  id= "design-view" #design-view style="width: 1920px; height: 1080px"
+            <div  id= "design-view" #design-view style="width: 1920px; height: 1080px;margin: 22px 0 0 22px "
                 &style="{display:tabView == 'design-view' ? 'block' : 'none'}"></div>
              <!-- 逻辑图 -->
             <div id="relation-ship" #relation-ship style="width: 1920px; height: 1080px"
@@ -85,6 +90,8 @@ import { CheckDetectChange, Component, Inject, ViewChild } from 'mark5';
             </div>
             <f-button @click="createEdge($event)">确认</f-button>
         </f-dialog>
+        <h1>测试区</h1>
+        <test></test>
     `,
 })
 class MyComponent {
@@ -92,14 +99,21 @@ class MyComponent {
     board;
     @ViewChild('relation-ship')
     relationship;
+    @ViewChild('scaleX')
+    scaleX;
+    @ViewChild('scaleY')
+    scaleY;
     tabView: string = 'design-view';
     dragTarget: EventTarget | null = null;
     data = {
-        nodes: [
-            { id: '1', type: 'scaleX', x: 0, y: 0 },
-            { id: '2', type: 'scaleY', x: 0, y: 0 },
-        ],
+        nodes: [],
         combos: [],
+    };
+    scaleXdata = {
+        nodes: [{ id: '1', type: 'scaleX', x: 0, y: 0 }],
+    };
+    scaleYdata = {
+        nodes: [{ id: '2', type: 'scaleY', x: 0, y: 0 }],
     };
     eventNodes = [];
     graph: any;
@@ -148,12 +162,42 @@ class MyComponent {
             title: '按钮',
             img: '../menu/button.svg',
         },
+        {
+            id: 'combination-form',
+            type: 'node',
+            title: 'form组合',
+            img: '../menu/combination-form.svg',
+        },
     ];
     newEdge;
     sourceSelect;
     targetSelect;
     diaDisplay: boolean = false;
     constructor(@Inject(CheckDetectChange) private cd: CheckDetectChange) {}
+    renderScale() {
+        const width = 1920,
+            height = 20,
+            scaleXgraph = new G6.Graph({
+                container: 'scaleX',
+                width: 1942,
+                height: 22,
+                // translate the graph to align the canvas's center, support by v3.5.1
+                defaultNode: {
+                    type: 'modelRect',
+                },
+            }),
+            scaleYgraph = new G6.Graph({
+                container: 'scaleY',
+                width: 22,
+                height: 1102,
+                // translate the graph to align the canvas's center, support by v3.5.1
+                defaultNode: {
+                    type: 'modelRect',
+                },
+            });
+        scaleXgraph.read(this.scaleXdata);
+        scaleYgraph.read(this.scaleYdata);
+    }
     changeView(e) {
         if (this.tabView === 'design-view') {
             this.tabView = 'relation-ship';
@@ -233,6 +277,7 @@ class MyComponent {
         const renderConfig = [...topNodes, ...topCombos].map((item) =>
             item._cfg.model.config.render(item)
         );
+        window['renderConfig'] = renderConfig;
         console.log(renderConfig);
     }
     exportCombo(combo) {
@@ -401,6 +446,7 @@ class MyComponent {
         this.addGlobalEvent();
         this.initBoard();
         this.initRelationShip();
+        this.renderScale();
     }
     changeCollapse(e) {
         this.coll = !this.coll;

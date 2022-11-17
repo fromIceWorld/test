@@ -19,17 +19,17 @@ G6.registerNode(
                 attrs: {
                     width: 24,
                     fill: 'black',
-                    height: 1080,
+                    height: 1102,
                 },
                 draggable: true,
                 name: 'text-border',
             });
-            for (let i = 0; i < 1920; i++) {
+            for (let i = 0; i < 1102; i++) {
                 if (i % 10 === 0) {
                     group.addShape('text', {
                         attrs: {
                             text: '—',
-                            y: i + 22,
+                            y: i + 23,
                             x: 12,
                             fontSize: 10,
                             textAlign: 'left',
@@ -45,7 +45,7 @@ G6.registerNode(
                     group.addShape('text', {
                         attrs: {
                             text: i % 20 === 0 ? '—' : '',
-                            y: i + 22,
+                            y: i + 23,
                             x: 2,
                             fontSize: 10,
                             textAlign: 'left',
@@ -58,7 +58,7 @@ G6.registerNode(
                     let num = group.addShape('text', {
                         attrs: {
                             text: transform(String(i)),
-                            y: 2,
+                            y: 3,
                             x: 0,
                             fontSize: 10,
                             textAlign: 'left',

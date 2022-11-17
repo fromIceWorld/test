@@ -57,7 +57,12 @@ G6.registerNode(
     'rect'
 );
 class INPUT_CONFIG extends NODE_CONFIG {
-    json = { placeholder: '请输入姓名', model: 'name', regexp: '' };
+    json = {
+        placeholder: '请输入姓名',
+        model: 'name',
+        value: '',
+        regexp: '^[1-9]{1,10}$',
+    };
     abstract = {
         html: {
             tagName: 'input',

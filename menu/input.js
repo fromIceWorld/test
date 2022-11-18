@@ -10,7 +10,8 @@ G6.registerNode(
         },
         afterDraw(cfg, group) {
             const { config } = cfg,
-                { placeholder } = config.json;
+                { attributes } = config.json,
+                { placeholder } = attributes;
             cfg.padding = [0, 0, 0, 0];
             group.addShape('text', {
                 id: 'text',
@@ -42,7 +43,8 @@ G6.registerNode(
         update(cfg, node) {
             console.log('input update', cfg);
             const { json } = cfg.config,
-                { placeholder } = json,
+                { attributes, properties } = json,
+                { placeholder } = attributes,
                 group = node.getContainer();
             let textShape = group.findById('text');
             textShape.attr('text', placeholder);
@@ -57,11 +59,17 @@ G6.registerNode(
     'rect'
 );
 class INPUT_CONFIG extends NODE_CONFIG {
+    static index = 0;
     json = {
-        placeholder: '请输入姓名',
-        model: 'name',
-        value: '',
-        regexp: '^[1-9]{1,10}$',
+        attributes: {
+            placeholder: '请输入姓名',
+            formcontrol: 'name',
+        },
+        properties: {
+            value: '',
+            updateOn: 'change',
+            regexp: '^[1-9]{1,10}$',
+        },
     };
     abstract = {
         html: {
@@ -77,40 +85,31 @@ class INPUT_CONFIG extends NODE_CONFIG {
             output: ['change', 'blur'],
         },
     };
-    renderConfig = {
-        abductees: [],
-        config: null,
-    };
-    status = {
-        hijack: false,
-    };
     // 返回node节点渲染data，和 base config
-    render(node) {
-        if (this.renderConfig.config) {
-            return this.renderConfig.config;
-        }
-        const base = node._cfg.model.config,
-            { html, classes, style } = this.abstract,
-            { tagName, attributes } = html,
-            json = this.json;
+    render() {
+        const index = INPUT_CONFIG.index,
+            { attributes, properties } = this.json,
+            { placeholder, formcontrol } = attributes,
+            { value, updateOn, regexp } = properties;
         let config = {
-            html: `<${tagName} 
-                        type="${attributes.type}"
-                        placeholder="${json.placeholder}"
-                        ${json.model ? '%="' + json.model + '"' : ''}
-                   ></${tagName}>`,
-            data: {},
-            hooks: {
-                fns: [],
-                OnInit: [],
-                OnInputChanges: [],
-                OnViewInit: [],
-                OnViewUpdated: [],
-                OnUpdated: [],
-                OnViewUpdated: [],
-            },
+            html: `<input 
+                        is="my-input-${index}"
+                        type="text"
+                        placeholder="${placeholder}"
+                        formcontrol="${formcontrol}"
+                   ></input>`,
+            js: `class MyInput${index} extends MyInput{
+                constructor(){
+                    super();
+                    this.value = '${value}';
+                    this.regexp = '${regexp}';
+                    this.updateOn = '${updateOn}';
+                }
+            };
+            customElements.define('my-input-${index}',MyInput${index},{ extends: 'input' })
+            `,
         };
-        this.renderConfig.config = config;
+        INPUT_CONFIG.index++;
         return config;
     }
 }

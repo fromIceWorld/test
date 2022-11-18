@@ -268,11 +268,6 @@ class MyComponent {
         console.log(nodes, combos);
         let topNodes = nodes.filter((node) => !node._cfg.model.comboId);
         let topCombos = combos.filter((combo) => !combo._cfg.model.parentId);
-        console.log(topNodes, topCombos);
-        // 标记 组件间的劫持关系
-        topCombos.forEach((combo) => {
-            combo._cfg.model.config.markAsHijack(combo);
-        });
         // 输出组件 template， data， js
         const renderConfig = [...topNodes, ...topCombos].map((item) =>
             item._cfg.model.config.render(item)
@@ -415,8 +410,8 @@ class MyComponent {
             config = model.config,
             json = model.config.json;
         let { dom, value } = e.detail,
-            { json: newJson } = value;
-        Object.assign(json, newJson);
+            { obj } = value;
+        Object.assign(json[obj], value[obj]);
         console.log(config);
         // 节点需要更新 view
         if (this.focusNode) {
@@ -623,12 +618,13 @@ class MyComponent {
         graph.on('node:click', (evt) => {
             this.focusCombo = null;
             const { item } = evt,
-                json = item._cfg.model.config.json;
+                json = item._cfg.model.config.json,
+                { attributes, properties } = json;
             console.log(item);
             this.unFocus(this.focusNode);
             this.focus(item); //focus当前节点
             this.focusNode = item;
-            this.config = [json];
+            this.config = [attributes, properties];
             this.cd.detectChanges();
         });
         graph.on('combo:click', (evt) => {

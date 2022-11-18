@@ -11,12 +11,13 @@ G6.registerNode(
         },
         draw(cfg, group) {
             const self = this,
-                text = cfg.config.json.name;
+                { attributes, properties } = cfg.config.json,
+                { name } = attributes;
             // 获取配置中的 Combo 内边距
             cfg.padding = [5, 5, 5, 5];
             // 获取样式配置，style.width 与 style.height 对应 rect Combo 位置说明图中的 width 与 height
             const style = self.getShapeStyle(cfg),
-                width = measureText(text, '14px');
+                width = measureText(name, '14px');
             // 绘制一个矩形作为 keyShape，与 'rect' Combo 的 keyShape 一致
             return group.addShape('rect', {
                 attrs: {
@@ -30,8 +31,8 @@ G6.registerNode(
             });
         },
         afterDraw(cfg, group) {
-            const { config } = cfg,
-                { name } = config.json;
+            const { attributes, properties } = cfg.config.json,
+                { name } = attributes;
             width = measureText(name, '14px');
             group.addShape('text', {
                 id: 'text',
@@ -49,7 +50,8 @@ G6.registerNode(
             });
         },
         update(cfg, node) {
-            const { name } = cfg.config.json,
+            const { attributes, properties } = cfg.config.json,
+                { name } = attributes,
                 textLength = measureText(name, '14px'),
                 group = node.getContainer();
             let textShape, box;
@@ -80,7 +82,10 @@ G6.registerNode(
 // 独属于每一个节点的render函数，在G6中会被抹除，通过原型保存
 class BUTTON_CONFIG extends NODE_CONFIG {
     json = {
-        name: '确定',
+        attributes: {
+            name: '确定',
+        },
+        properties: {},
     };
     abstract = {
         html: {
@@ -96,34 +101,13 @@ class BUTTON_CONFIG extends NODE_CONFIG {
             output: ['click'],
         },
     };
-    renderConfig = {
-        abductees: [],
-        config: null,
-    };
-    status = {
-        hijack: false,
-    };
-    render(node) {
-        if (this.renderConfig.config) {
-            return this.renderConfig.config;
-        }
-        const base = node._cfg.model.config,
-            { html, classes, style, event } = this.abstract,
-            json = this.json;
+    render() {
+        const { attributes, properties } = this.json,
+            { name } = attributes;
         let config = {
-            html: `<${html.tagName} type="button" value="${json.name}"></${html.tagName}>`,
-            data: {},
-            hooks: {
-                fns: [],
-                OnInit: [],
-                OnInputChanges: [],
-                OnViewInit: [],
-                OnViewUpdated: [],
-                OnUpdated: [],
-                OnViewUpdated: [],
-            },
+            html: `<input type="button" value="${name}"></input>`,
+            js: ``,
         };
-        this.renderConfig.config = config;
         return config;
     }
 }

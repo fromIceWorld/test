@@ -13,7 +13,8 @@ G6.registerNode(
         },
         draw: function (cfg, group) {
             const self = this,
-                options = cfg.config.json.options;
+                { attributes, properties } = cfg.config.json,
+                { options } = properties;
             // 获取配置中的 Combo 内边距
             cfg.padding = [0, 0, 0, 0];
             // 获取样式配置，style.width 与 style.height 对应 rect Combo 位置说明图中的 width 与 height
@@ -34,15 +35,11 @@ G6.registerNode(
             });
         },
         afterDraw(cfg, group) {
-            const { config } = cfg,
-                { options } = config.json;
-            renderRadio(group, config.json, false);
+            renderRadio(group, cfg.config.json, false);
         },
         update(cfg, node) {
-            const { json } = cfg.config,
-                group = node.get('group'),
-                { options } = json;
-            renderRadio(group, json, true);
+            const group = node.get('group');
+            renderRadio(group, cfg.config.json, true);
         },
         afterUpdate(cfg, item) {},
     },
@@ -55,7 +52,8 @@ function renderRadio(group, json, destroy) {
         });
         willDel.forEach((item) => group.removeChild(item));
     }
-    const { options } = json,
+    const { attributes, properties } = json,
+        { options } = properties,
         boxWidth = computedWidth(options, group);
     JSON.parse(options).reduce((preWidth, item, index) => {
         group.addShape('text', {
@@ -94,7 +92,7 @@ function renderRadio(group, json, destroy) {
             name: item.label + '_outer-circle' + Math.random(),
         });
         return preWidth + 30 + measureText(item.label);
-    }, 5 - 30) + 30;
+    }, -35) + 30;
     const box = group.find(function (item) {
         console.log(item);
         return item.attr('name') === 'radio-border';
@@ -111,12 +109,17 @@ function computedWidth(optionsString) {
     return width;
 }
 class RADIO_CONFIG extends NODE_CONFIG {
+    static index = 0;
     json = {
-        options: JSON.stringify([
-            { label: '男', value: '男', checked: true },
-            { label: '女', value: '女', checked: false },
-        ]),
-        model: 'sex',
+        attributes: {
+            formcontrol: 'sex',
+        },
+        properties: {
+            options: JSON.stringify([
+                { label: '男', value: '男', checked: true },
+                { label: '女', value: '女', checked: false },
+            ]),
+        },
     };
     abstract = {
         html: {
@@ -132,46 +135,23 @@ class RADIO_CONFIG extends NODE_CONFIG {
             output: ['change'],
         },
     };
-    renderConfig = {
-        abductees: [],
-        config: null,
-    };
-    status = {
-        hijack: false,
-    };
-    render(node) {
-        if (this.renderConfig.config) {
-            return this.renderConfig.config;
-        }
-        const base = node._cfg.model.config,
-            { html, classes, style } = this.abstract,
-            json = this.json,
-            options = JSON.parse(json.options),
-            name = Math.random();
+    render() {
+        const { attributes, properties } = this.json,
+            { formcontrol } = attributes,
+            { options } = properties;
         let config = {
-            html: `${options
-                .map((item) => {
-                    return `<input type='radio' 
-                                       id="${item.value}" 
-                                       ${item.checked ? 'checked' : ''}
-                                       name="${name}" 
-                                       value="${item.value}"> 
-                            <label for="${item.value}">${item.label}</label>
-                            `;
-                })
-                .join('\n')}`,
-            data: {},
-            hooks: {
-                fns: [],
-                OnInit: [],
-                OnInputChanges: [],
-                OnViewInit: [],
-                OnViewUpdated: [],
-                OnUpdated: [],
-                OnViewUpdated: [],
-            },
+            html: `<my-radio-${RADIO_CONFIG.index} formcontrol='${formcontrol}'>`,
+            js: `class MyRadio${RADIO_CONFIG.index} extends MyRadio{
+                constructor(){
+                    super();
+                    this.options = ${options}
+                }
+            }
+            customElements.define('my-radio-${RADIO_CONFIG.index}',MyRadio${RADIO_CONFIG.index})
+            `,
         };
-        this.renderConfig.config = config;
+        config.html += `</my-radio-${RADIO_CONFIG.index}>`;
+        RADIO_CONFIG.index++;
         return config;
     }
 }

@@ -10,7 +10,8 @@ G6.registerNode(
         },
         draw(cfg, group) {
             const self = this,
-                text = cfg.config.json.text;
+                { attributes, properties } = cfg.config.json,
+                { text } = properties;
             // 获取配置中的 Combo 内边距
             cfg.padding = [5, 5, 5, 5];
             // 获取样式配置，style.width 与 style.height 对应 rect Combo 位置说明图中的 width 与 height
@@ -29,8 +30,8 @@ G6.registerNode(
             });
         },
         afterDraw(cfg, group) {
-            const { config } = cfg,
-                { text } = config.json;
+            const { attributes, properties } = cfg.config.json,
+                { text } = properties;
             width = measureText(text, '14px');
             group.addShape('text', {
                 id: 'text',
@@ -48,7 +49,8 @@ G6.registerNode(
             });
         },
         update(cfg, node) {
-            const { text } = cfg.config.json,
+            const { attributes, properties } = cfg.config.json,
+                { text } = properties,
                 textLength = measureText(text, '14px'),
                 group = node.get('group');
             let textShape, box;
@@ -79,8 +81,11 @@ G6.registerNode(
 // 独属于每一个节点的render函数，在G6中会被抹除，通过原型保存
 class TEXT_CONFIG extends NODE_CONFIG {
     json = {
-        text: '姓名',
-        model: '',
+        attributes: {},
+        properties: {
+            model: '',
+            text: '姓名',
+        },
     };
     abstract = {
         html: {
@@ -94,32 +99,12 @@ class TEXT_CONFIG extends NODE_CONFIG {
             output: [],
         },
     };
-    renderConfig = {
-        abductees: [],
-        config: null,
-    };
-    status = {
-        hijack: false,
-    };
-    render(node) {
-        if (this.renderConfig.config) {
-            return this.renderConfig.config;
-        }
-        const base = node._cfg.model.config,
-            { html, classes, style } = this.abstract,
-            json = this.json;
+    render() {
+        const { attributes, properties } = this.json,
+            { text } = properties;
         let config = {
-            html: `<${html.tagName}>${json.text}</${html.tagName}>`,
-            data: {},
-            hooks: {
-                fns: [],
-                OnInit: [],
-                OnInputChanges: [],
-                OnViewInit: [],
-                OnViewUpdated: [],
-                OnUpdated: [],
-                OnViewUpdated: [],
-            },
+            html: `<span>${text}</span>`,
+            js: ``,
         };
         return config;
     }

@@ -3,9 +3,15 @@ import { Component, EventEmitter, Input, Output } from 'mark5';
     selector: `app-tab`,
     template: `
     <p>数据：</p>
+        <h5>attributes:</h5>
         <div *forOf="Object.entries(config[0] ||[])">
             <span>{{item[0]}} : </span>
-            <span contenteditable @blur="emitUpdate($event,item[0])" @focus="onEdit($event)">{{item[1]}}</span>
+            <span contenteditable @blur="emitUpdate($event,item[0],'attributes')" @focus="onEdit($event)">{{item[1]}}</span>
+        </div>
+        <h5>properties:</h5>
+        <div *forOf="Object.entries(config[1] ||[])">
+            <span>{{item[0]}} : </span>
+            <span contenteditable @blur="emitUpdate($event,item[0],'properties')" @focus="onEdit($event)">{{item[1]}}</span>
         </div>
         <p>布局：</p>
         <span class="label">flex-direction:</span>
@@ -41,15 +47,16 @@ class TabComponent {
             });
         }
     }
-    emitUpdate(e, key: any) {
+    emitUpdate(e, key: any, obj) {
         this.editEvent.emit(false);
         let target = e.target,
             content = this.getContent(target);
         console.log(e, key, content);
         this.updateJSON.emit({
-            json: {
+            [obj]: {
                 [key]: content,
             },
+            obj: obj,
         });
     }
     onEdit(e) {

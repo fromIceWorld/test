@@ -15,30 +15,10 @@ class INPUT_BOX_CONFIG extends COMBINATION_CONFIG {
             output: [],
         },
     };
-    renderConfig = {
-        abductees: [],
-        config: null,
-    };
-    status = {
-        hijack: false,
-    };
-    markAsHijack() {}
     render(combo) {
-        if (this.renderConfig.config) {
-            return this.renderConfig.config;
-        }
         let config = {
             html: `<div>`,
-            data: {},
-            hooks: {
-                fns: [],
-                OnInit: [],
-                OnInputChanges: [],
-                OnViewInit: [],
-                OnViewUpdated: [],
-                OnUpdated: [],
-                OnViewUpdated: [],
-            },
+            js: ``,
         };
         const { nodes: nextNodes, combos: nextCombos } =
             this.getNextChildren(combo);
@@ -46,8 +26,9 @@ class INPUT_BOX_CONFIG extends COMBINATION_CONFIG {
             next._cfg.model.config.render(next)
         );
         childConfig.forEach((child) => {
-            const { html, data, hooks } = child;
+            const { html, js } = child;
             config.html += html;
+            config.js += js;
         });
         config.html += `</div>`;
         return config;

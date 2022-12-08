@@ -11,8 +11,8 @@ G6.registerNode(
         },
         draw(cfg, group) {
             const self = this,
-                { attributes, properties } = cfg.config.json,
-                { name } = attributes;
+                { properties } = cfg.config.json,
+                { name } = properties;
             // 获取配置中的 Combo 内边距
             cfg.padding = [5, 5, 5, 5];
             // 获取样式配置，style.width 与 style.height 对应 rect Combo 位置说明图中的 width 与 height
@@ -31,8 +31,8 @@ G6.registerNode(
             });
         },
         afterDraw(cfg, group) {
-            const { attributes, properties } = cfg.config.json,
-                { name } = attributes;
+            const { properties } = cfg.config.json,
+                { name } = properties;
             width = measureText(name, '14px');
             group.addShape('text', {
                 id: 'text',
@@ -50,8 +50,8 @@ G6.registerNode(
             });
         },
         update(cfg, node) {
-            const { attributes, properties } = cfg.config.json,
-                { name } = attributes,
+            const { properties } = cfg.config.json,
+                { name } = properties,
                 textLength = measureText(name, '14px'),
                 group = node.getContainer();
             let textShape, box;
@@ -81,11 +81,23 @@ G6.registerNode(
 
 // 独属于每一个节点的render函数，在G6中会被抹除，通过原型保存
 class BUTTON_CONFIG extends NODE_CONFIG {
+    static index = 0;
+    index;
+    tagName;
+    constructor() {
+        super();
+        this.tagName = `my-button-${BUTTON_CONFIG.index}`;
+        this.index = BUTTON_CONFIG.index;
+        BUTTON_CONFIG.index++;
+    }
     json = {
-        attributes: {
+        attributes: {},
+        properties: {
             name: '确定',
+            icon: '',
+            shape: '',
+            type: '',
         },
-        properties: {},
     };
     abstract = {
         html: {
@@ -97,16 +109,27 @@ class BUTTON_CONFIG extends NODE_CONFIG {
         classes: '',
         style: {},
         component: {
-            input: [],
-            output: ['click'],
+            event: ['click'],
+            methods: [],
         },
     };
     render() {
-        const { attributes, properties } = this.json,
-            { name } = attributes;
+        const { properties } = this.json,
+            tagName = this.tagName,
+            { name, icon, shape, type } = properties;
         let config = {
-            html: `<input type="button" value="${name}"></input>`,
-            js: ``,
+            html: `<${tagName}></${tagName}>`,
+            js: `class MyButton${this.index} extends MyButton{
+                    constructor(){
+                        super();
+                        this.name = '${name}';
+                        this.icon = '${icon}';
+                        this.shape = '${shape}';
+                        this.type = '${type}';
+                    }
+                }
+                customElements.define('${tagName}',MyButton${this.index})
+                `,
         };
         return config;
     }

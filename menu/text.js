@@ -80,6 +80,15 @@ G6.registerNode(
 
 // 独属于每一个节点的render函数，在G6中会被抹除，通过原型保存
 class TEXT_CONFIG extends NODE_CONFIG {
+    static index = 0;
+    index;
+    tagName;
+    constructor() {
+        super();
+        this.tagName = `my-text-${TEXT_CONFIG.index}`;
+        this.index = TEXT_CONFIG.index;
+        TEXT_CONFIG.index++;
+    }
     json = {
         attributes: {},
         properties: {
@@ -95,8 +104,8 @@ class TEXT_CONFIG extends NODE_CONFIG {
         classes: '',
         style: {},
         component: {
-            input: [],
-            output: [],
+            event: [],
+            methods: [],
         },
     };
     render() {

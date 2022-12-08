@@ -1,25 +1,40 @@
 class INPUT_BOX_CONFIG extends COMBINATION_CONFIG {
+    static index = 0;
+    index;
+    tagName;
+    constructor() {
+        super();
+        this.tagName = `my-input-box-${INPUT_BOX_CONFIG.index}`;
+        this.index = INPUT_BOX_CONFIG.index;
+        INPUT_BOX_CONFIG.index++;
+    }
     json = {};
     abstract = {
         html: {
-            tagName: 'div',
+            tagName: 'my-input-box',
             attributes: {},
         },
         classes: '',
         style: {
             display: 'flex',
-            'flex-direction': 'row',
         },
         component: {
-            input: ['value'],
-            output: [],
+            event: [],
+            methods: [],
         },
     };
     render(combo) {
-        let config = {
-            html: `<div>`,
-            js: ``,
-        };
+        let flexDirection = this.abstract.style['flex-direction'],
+            config = {
+                html: `<${this.tagName} style="display:flex;${
+                    flexDirection
+                        ? flexDirection === 'row'
+                            ? 'flex-direction:row'
+                            : 'flex-direction:column'
+                        : ''
+                }">`,
+                js: ``,
+            };
         const { nodes: nextNodes, combos: nextCombos } =
             this.getNextChildren(combo);
         let childConfig = [...nextNodes, ...nextCombos].map((next) =>
@@ -30,7 +45,7 @@ class INPUT_BOX_CONFIG extends COMBINATION_CONFIG {
             config.html += html;
             config.js += js;
         });
-        config.html += `</div>`;
+        config.html += `</${this.tagName}>`;
         return config;
     }
 }

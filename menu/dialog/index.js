@@ -1,48 +1,22 @@
-class FormGroup {
-    constructor(controls) {
-        for (let [key, config] of Object.entries(controls)) {
-            this[key] = config;
-            config['group'] = this;
-        }
-    }
-    get(key) {
-        const { value } = this[key];
-        return value;
-    }
-    subs = [];
-    subscribe(fn) {
-        this.subs.push(fn);
-    }
-    change(key, value) {
-        console.log(key, value);
-        this.subs.forEach((fn) => {
-            this[key].value = value;
-            let valid = new RegExp(this[key].regexp).test(value);
-            fn(key, value, valid);
-        });
-    }
-}
-class FORM_CONFIG extends COMBINATION_CONFIG {
+class DIALOG_CONFIG extends COMBINATION_CONFIG {
     static index = 0;
     index;
     tagName;
     constructor() {
         super();
-        this.tagName = `my-form-${FORM_CONFIG.index}`;
-        this.index = FORM_CONFIG.index;
-        FORM_CONFIG.index++;
+        this.tagName = `my-dialog-model-${DIALOG_CONFIG.index}`;
+        this.index = DIALOG_CONFIG.index;
+        DIALOG_CONFIG.index++;
     }
     json = {
         attributes: {
-            formgroup: 'fg',
+            title: '对话框',
         },
-        properties: {
-            api: '/test/list',
-        },
+        properties: {},
     };
     abstract = {
         html: {
-            tagName: 'form',
+            tagName: 'my-dialog-model',
             attributes: {},
         },
         classes: '',
@@ -50,32 +24,33 @@ class FORM_CONFIG extends COMBINATION_CONFIG {
             display: 'flex',
         },
         component: {
-            event: ['submit', 'reset'],
-            methods: ['submit'],
+            event: ['visible', 'hiden', 'visibleChange'],
+            methods: ['visible', 'hiden', 'visibleChange'],
         },
     };
     // 返回combo节点渲染data
     render(combo) {
         const { attributes, properties } = this.json,
             tagName = this.tagName,
-            { formgroup } = attributes,
+            { title } = attributes,
             flexDirection = this.abstract.style['flex-direction'],
             { api } = properties;
         let config = {
-            html: `<${tagName} formgroup="${formgroup}" style="display:flex;${
+            html: `<${tagName} style="display:flex;${
                 flexDirection
                     ? flexDirection === 'row'
                         ? 'flex-direction:row'
                         : 'flex-direction:column'
                     : ''
             }">`,
-            js: `class MyForm${this.index} extends MyForm{
+            js: `class MyDialogModel${this.index} extends MyDialogModel{
                     constructor(){
                         super();
-                        this.api = '${api}'
+                        this.MyTitle = '${title}';
+                        this.init();
                     }
                  }
-                 customElements.define('${tagName}',MyForm${this.index})
+                 customElements.define('${tagName}',MyDialogModel${this.index})
                  `,
         };
         const { nodes: nextNodes, combos: nextCombos } =
@@ -92,9 +67,9 @@ class FORM_CONFIG extends COMBINATION_CONFIG {
         return config;
     }
 }
-configModule['FORM_CONFIG'] = FORM_CONFIG;
+configModule['DIALOG_CONFIG'] = DIALOG_CONFIG;
 G6.registerCombo(
-    'form',
+    'dialog',
     {
         options: {
             style: {

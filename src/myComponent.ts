@@ -24,21 +24,80 @@ import { CheckDetectChange, Component, Inject, ViewChild } from 'mark5';
                 @click="changeView($event)"
             ></img>
             <div class="collapse">
-                <div class="collapse-header" @click="changeCollapse($event)">> form</div>
-                    <div *if="coll">
-                        <div draggable="true" *forOf="collapses" >
-                            <img
-                                &title="item.title"
-                                &src="item.img"
-                                width="20px"
-                                &id="item.id"
-                                &type="item.type"
+                <div class="collapse-header" @click="changeCollapse($event,'coll0')">> base</div>
+                    <div *if="coll0">
+                        <my-for-00>
+                            <div draggable="true">
+                                <img
+                                    title="{{title}}"
+                                    src="{{img}}"
+                                    width="20px"
+                                    id="{{id}}"
+                                    type="{{type}}"
                                 ></img>
-                        </div>
+                            </div>
+                        </my-for-00>
                     </div>
+                <div class="collapse-header" @click="changeCollapse($event,'coll')">> form</div>
+                    <div *if="coll">
+                        <my-for-99>
+                            <div draggable="true">
+                                <img
+                                    title="{{title}}"
+                                    src="{{img}}"
+                                    width="20px"
+                                    id="{{id}}"
+                                    type="{{type}}"
+                                ></img>
+                            </div>
+                        </my-for-99>
+                    </div>
+                    <div class="collapse-header" @click="changeCollapse($event,'coll2')">> flex</div>
+                    <div *if="coll2">
+                        <my-for-88>
+                            <div draggable="true">
+                                <img
+                                    title="{{title}}"
+                                    src="{{img}}"
+                                    width="20px"
+                                    id="{{id}}"
+                                    type="{{type}}"
+                                ></img>
+                            </div>
+                        </my-for-88>
+                    </div>
+                    <div class="collapse-header" @click="changeCollapse($event,'coll3')">> dialog</div>
+                    <div *if="coll3">
+                        <my-for-77>
+                            <div draggable="true">
+                                <img
+                                    title="{{title}}"
+                                    src="{{img}}"
+                                    width="20px"
+                                    id="{{id}}"
+                                    type="{{type}}"
+                                ></img>
+                            </div>
+                        </my-for-77>
+                    </div>
+                    <div class="collapse-header" @click="changeCollapse($event,'coll4')">> process</div>
+                    <div *if="coll4">
+                        <my-for-66>
+                            <div draggable="true">
+                                <img
+                                    title="{{title}}"
+                                    src="{{img}}"
+                                    width="20px"
+                                    id="{{id}}"
+                                    type="{{type}}"
+                                ></img>
+                            </div>
+                        </my-for-66>
+                    </div>
+
+                </div>
+                
             </div>
-        </div>
-        
         <div id="drawing-board" style="position:relative">
             <!-- scaleX -->
             <div id="scaleX" #scaleX style="position: absolute;"></div>
@@ -66,6 +125,25 @@ import { CheckDetectChange, Component, Inject, ViewChild } from 'mark5';
             </div>
         </div>
          <!-- 连线弹窗 事件 -->
+         <my-dialog-model-99 #dialog>
+            <div>
+                <span class="label">source:</span>
+                <f-select %="sourceSelect">
+                    <f-option *forOf="sourceList" &value="item">
+                        {{ item }}
+                    </f-option>
+                </f-select>
+            </div>
+            <div>
+                <span class="label">target:</span>
+                <f-select %="targetSelect">
+                    <f-option *forOf="targetList" &value="item">
+                        {{ item }}
+                    </f-option>
+                </f-select>
+            </div>
+            <f-button @click="createEdge($event)">确认</f-button>
+         </my-dialog-model-99>
          <f-dialog
             style="width:400px"
             title="对话框"
@@ -91,7 +169,6 @@ import { CheckDetectChange, Component, Inject, ViewChild } from 'mark5';
             <f-button @click="createEdge($event)">确认</f-button>
         </f-dialog>
         <h1>测试区</h1>
-        <test></test>
     `,
 })
 class MyComponent {
@@ -103,6 +180,8 @@ class MyComponent {
     scaleX;
     @ViewChild('scaleY')
     scaleY;
+    @ViewChild('dialog')
+    dialog;
     tabView: string = 'design-view';
     dragTarget: EventTarget | null = null;
     data = {
@@ -122,6 +201,10 @@ class MyComponent {
     focusCombo: any = null;
     jsonOnEdit: boolean = false;
     coll: boolean = true;
+    coll0: boolean = true;
+    coll2: boolean = true;
+    coll3: boolean = true;
+    coll4: boolean = true;
     config = [];
     sourceList = [];
     targetList = [];
@@ -163,10 +246,10 @@ class MyComponent {
             img: '../menu/button.svg',
         },
         {
-            id: 'combination-form',
-            type: 'node',
-            title: 'form组合',
-            img: '../menu/combination-form.svg',
+            id: 'dialog',
+            type: 'combo',
+            title: 'dialog',
+            img: '../menu/dialog.svg',
         },
     ];
     newEdge;
@@ -263,17 +346,90 @@ class MyComponent {
         this.graph.read({});
     }
     exportData() {
+        // 节点数据
         const nodes = this.graph.getNodes(),
             combos = this.graph.getCombos();
         console.log(nodes, combos);
         let topNodes = nodes.filter((node) => !node._cfg.model.comboId);
         let topCombos = combos.filter((combo) => !combo._cfg.model.parentId);
+        // 节点原型连接
+        this.setPrototypeOfConfig(nodes, combos);
         // 输出组件 template， data， js
         const renderConfig = [...topNodes, ...topCombos].map((item) =>
             item._cfg.model.config.render(item)
         );
         window['renderConfig'] = renderConfig;
-        console.log(renderConfig);
+        // 连线数据
+        const edges = this.relationshipGraph.getEdges().map((edge) => {
+            const { source, target, label } = edge._cfg.model;
+            return {
+                source,
+                target,
+                label,
+            };
+        });
+        let h = document.createElement('div'),
+            hHTML = ``,
+            s = document.createElement('script'),
+            sScript = ``;
+        renderConfig.forEach((item) => {
+            const { html, js } = item;
+            hHTML += html;
+            sScript += js;
+        });
+        const events = edges
+            .map((edge) => {
+                const { source, target, label } = edge,
+                    [event, method] = label.split('->');
+                const js = `
+                let ${source.replace(
+                    /-/g,
+                    '_'
+                )} = document.querySelector('${source}'),
+                    ${target.replace(
+                        /-/g,
+                        '_'
+                    )} = document.querySelector('${target}');
+                // 初始化事件
+                ${source.replace(/-/g, '_')}.init${event.replace(
+                    /^[a-z]/,
+                    (s) => s.toLocaleUpperCase()
+                )}Event();
+                ${source.replace(
+                    /-/g,
+                    '_'
+                )}.addEventListener('when${event.replace(/^[a-z]/, (s) =>
+                    s.toLocaleUpperCase()
+                )}', (e)=> ${target.replace(
+                    /-/g,
+                    '_'
+                )}.${method}(e, '${target}', '${method}'))    
+            `;
+                sScript += js;
+                return js;
+            })
+            .join();
+        h.innerHTML = hHTML;
+        s.innerHTML = `with(bundle){${sScript}}`;
+        document.body.append(h, s);
+        console.log(renderConfig, events);
+    }
+    // 储存的JSON数据无自己的原型，需要手动连接
+    setPrototypeOfConfig(nodes, combos) {
+        for (let node of [...nodes, ...combos]) {
+            const { id } = node._cfg;
+            const [, name] = id.match(/^my\-([a-z-]+)\-[0-9]+/),
+                source =
+                    configModule[
+                        name
+                            .split('-')
+                            .map((s: string) => s.toLocaleUpperCase())
+                            .join('_') + '_CONFIG'
+                    ];
+            let config = node._cfg.model.config;
+            config.__pro;
+            Object.setPrototypeOf(config, source.prototype);
+        }
     }
     exportCombo(combo) {
         let s = '',
@@ -443,8 +599,8 @@ class MyComponent {
         this.initRelationShip();
         this.renderScale();
     }
-    changeCollapse(e) {
-        this.coll = !this.coll;
+    changeCollapse(e, key) {
+        this[key] = !this[key];
         this.cd.detectChanges();
     }
     initRelationShip() {
@@ -579,9 +735,9 @@ class MyComponent {
         graph.on('aftercreateedge', (e) => {
             const newEdge = e.edge,
                 { sourceNode, targetNode } = newEdge._cfg,
-                { output: sourceOutput } =
+                { event: sourceOutput } =
                     sourceNode._cfg.model.config.abstract.component,
-                { output: targetOutput } =
+                { methods: targetOutput } =
                     targetNode._cfg.model.config.abstract.component,
                 edges = graph.save().edges;
 
@@ -595,8 +751,10 @@ class MyComponent {
                 });
             });
             this.newEdge = newEdge;
-            this.diaDisplay = true;
-            this.cd.detectChanges();
+            this.dialog.visibleChange();
+            console.log(this.dialog);
+
+            // this.cd.detectChanges();
         });
     }
     graphAddEventListener() {
@@ -636,8 +794,9 @@ class MyComponent {
             console.log(this.eventNodes);
             // 展示combo  json 数据
             const { item } = evt,
-                json = item._cfg.model.config.json;
-            this.config = [json];
+                json = item._cfg.model.config.json,
+                { attributes, properties } = json;
+            this.config = [attributes, properties];
             this.cd.detectChanges();
         });
         graph.on('node:mouseenter', (evt) => {
@@ -729,7 +888,7 @@ class MyComponent {
                     let config = {
                         x: targetX,
                         y: targetY,
-                        id: String(Math.random()),
+                        id: nodeSetting.tagName,
                         type: id,
                         config: nodeSetting,
                     };
@@ -743,7 +902,11 @@ class MyComponent {
                             ...config,
                         });
                     }
-                    if (componentConfig && componentConfig.output.length) {
+                    if (
+                        componentConfig &&
+                        (componentConfig.event.length ||
+                            componentConfig.methods.length)
+                    ) {
                         that.relationshipGraph.addItem('node', {
                             ...config,
                         });

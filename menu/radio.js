@@ -110,6 +110,14 @@ function computedWidth(optionsString) {
 }
 class RADIO_CONFIG extends NODE_CONFIG {
     static index = 0;
+    index;
+    tagName;
+    constructor() {
+        super();
+        this.tagName = `my-radio-${RADIO_CONFIG.index}`;
+        this.index = RADIO_CONFIG.index;
+        RADIO_CONFIG.index++;
+    }
     json = {
         attributes: {
             formcontrol: 'sex',
@@ -131,27 +139,27 @@ class RADIO_CONFIG extends NODE_CONFIG {
         classes: '',
         style: {},
         component: {
-            input: ['options'],
-            output: ['change'],
+            event: ['change'],
+            methods: [],
         },
     };
     render() {
         const { attributes, properties } = this.json,
+            tagName = this.tagName,
             { formcontrol } = attributes,
             { options } = properties;
         let config = {
-            html: `<my-radio-${RADIO_CONFIG.index} formcontrol='${formcontrol}'>`,
-            js: `class MyRadio${RADIO_CONFIG.index} extends MyRadio{
+            html: `<${tagName} formcontrol='${formcontrol}'>`,
+            js: `class MyRadio${this.index} extends MyRadio{
                 constructor(){
                     super();
                     this.options = ${options}
                 }
             }
-            customElements.define('my-radio-${RADIO_CONFIG.index}',MyRadio${RADIO_CONFIG.index})
+            customElements.define('${tagName}',MyRadio${this.index})
             `,
         };
-        config.html += `</my-radio-${RADIO_CONFIG.index}>`;
-        RADIO_CONFIG.index++;
+        config.html += `</${tagName}>`;
         return config;
     }
 }

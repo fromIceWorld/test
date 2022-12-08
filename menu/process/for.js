@@ -1,48 +1,24 @@
-class FormGroup {
-    constructor(controls) {
-        for (let [key, config] of Object.entries(controls)) {
-            this[key] = config;
-            config['group'] = this;
-        }
-    }
-    get(key) {
-        const { value } = this[key];
-        return value;
-    }
-    subs = [];
-    subscribe(fn) {
-        this.subs.push(fn);
-    }
-    change(key, value) {
-        console.log(key, value);
-        this.subs.forEach((fn) => {
-            this[key].value = value;
-            let valid = new RegExp(this[key].regexp).test(value);
-            fn(key, value, valid);
-        });
-    }
-}
-class FORM_CONFIG extends COMBINATION_CONFIG {
+class FOR_CONFIG extends COMBINATION_CONFIG {
     static index = 0;
     index;
     tagName;
     constructor() {
         super();
-        this.tagName = `my-form-${FORM_CONFIG.index}`;
-        this.index = FORM_CONFIG.index;
-        FORM_CONFIG.index++;
+        this.tagName = `my-for-${FOR_CONFIG.index}`;
+        this.index = FOR_CONFIG.index;
+        FOR_CONFIG.index++;
     }
     json = {
-        attributes: {
-            formgroup: 'fg',
-        },
         properties: {
-            api: '/test/list',
+            options: JSON.stringify([
+                { label: '米饭', value: '米饭' },
+                { label: '面条', value: '面条' },
+            ]),
         },
     };
     abstract = {
         html: {
-            tagName: 'form',
+            tagName: 'my-for',
             attributes: {},
         },
         classes: '',
@@ -50,33 +26,31 @@ class FORM_CONFIG extends COMBINATION_CONFIG {
             display: 'flex',
         },
         component: {
-            event: ['submit', 'reset'],
-            methods: ['submit'],
+            event: [],
+            methods: ['setIteration'],
         },
     };
-    // 返回combo节点渲染data
     render(combo) {
-        const { attributes, properties } = this.json,
-            tagName = this.tagName,
-            { formgroup } = attributes,
+        const { properties } = this.json,
+            { style } = this.abstract,
             flexDirection = this.abstract.style['flex-direction'],
-            { api } = properties;
+            { options } = properties;
         let config = {
-            html: `<${tagName} formgroup="${formgroup}" style="display:flex;${
+            html: `<${this.tagName} style="display:flex;${
                 flexDirection
                     ? flexDirection === 'row'
                         ? 'flex-direction:row'
                         : 'flex-direction:column'
                     : ''
             }">`,
-            js: `class MyForm${this.index} extends MyForm{
+            js: `class MyFor${this.index} extends MyFor{
                     constructor(){
                         super();
-                        this.api = '${api}'
+                        this.options = ${options}
                     }
-                 }
-                 customElements.define('${tagName}',MyForm${this.index})
-                 `,
+                }
+                customElements.define('my-for-${this.index}', MyFor${this.index})
+                `,
         };
         const { nodes: nextNodes, combos: nextCombos } =
             this.getNextChildren(combo);
@@ -88,19 +62,20 @@ class FORM_CONFIG extends COMBINATION_CONFIG {
             config.html += html;
             config.js += js;
         });
-        config.html += `</${tagName}>`;
+        config.html += `</${this.tagName}>`;
         return config;
     }
 }
-configModule['FORM_CONFIG'] = FORM_CONFIG;
+configModule['FOR_CONFIG'] = FOR_CONFIG;
+
 G6.registerCombo(
-    'form',
+    'for',
     {
         options: {
             style: {
                 lineWidth: 1,
                 fill: '#00000000',
-                stroke: '#efefef',
+                stroke: '#bfb9b9b3',
                 lineDash: [5],
             },
             labelCfg: {
@@ -127,8 +102,6 @@ G6.registerCombo(
                     y:
                         -style.height / 2 -
                         (cfg.padding[0] - cfg.padding[2]) / 2,
-                    // width: style.width,
-                    // height: style.height,
                     width: 60,
                     height: 50,
                 },

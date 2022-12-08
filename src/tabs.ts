@@ -5,12 +5,12 @@ import { Component, EventEmitter, Input, Output } from 'mark5';
     <p>数据：</p>
         <h5>attributes:</h5>
         <div *forOf="Object.entries(config[0] ||[])">
-            <span>{{item[0]}} : </span>
+            <div>{{item[0]}} : </div>
             <span contenteditable @blur="emitUpdate($event,item[0],'attributes')" @focus="onEdit($event)">{{item[1]}}</span>
         </div>
         <h5>properties:</h5>
         <div *forOf="Object.entries(config[1] ||[])">
-            <span>{{item[0]}} : </span>
+            <div>{{item[0]}} : </div>
             <span contenteditable @blur="emitUpdate($event,item[0],'properties')" @focus="onEdit($event)">{{item[1]}}</span>
         </div>
         <p>布局：</p>

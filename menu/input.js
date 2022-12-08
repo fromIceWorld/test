@@ -60,6 +60,14 @@ G6.registerNode(
 );
 class INPUT_CONFIG extends NODE_CONFIG {
     static index = 0;
+    index;
+    tagName;
+    constructor() {
+        super();
+        this.tagName = `my-input-${INPUT_CONFIG.index}`;
+        this.index = INPUT_CONFIG.index;
+        INPUT_CONFIG.index++;
+    }
     json = {
         attributes: {
             placeholder: '请输入姓名',
@@ -81,19 +89,20 @@ class INPUT_CONFIG extends NODE_CONFIG {
         classes: '',
         style: {},
         component: {
-            input: ['value'],
-            output: ['change', 'blur'],
+            event: ['validate', 'change', 'clear', 'blur'],
+            methods: [],
         },
     };
     // 返回node节点渲染data，和 base config
     render() {
-        const index = INPUT_CONFIG.index,
+        const index = this.index,
+            tagName = this.tagName,
             { attributes, properties } = this.json,
             { placeholder, formcontrol } = attributes,
             { value, updateOn, regexp } = properties;
         let config = {
             html: `<input 
-                        is="my-input-${index}"
+                        is=${tagName}"
                         type="text"
                         placeholder="${placeholder}"
                         formcontrol="${formcontrol}"
@@ -106,10 +115,9 @@ class INPUT_CONFIG extends NODE_CONFIG {
                     this.updateOn = '${updateOn}';
                 }
             };
-            customElements.define('my-input-${index}',MyInput${index},{ extends: 'input' })
+            customElements.define('${tagName}',MyInput${this.index},{ extends: 'input' })
             `,
         };
-        INPUT_CONFIG.index++;
         return config;
     }
 }

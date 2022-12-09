@@ -109,7 +109,7 @@ class BUTTON_CONFIG extends NODE_CONFIG {
         classes: '',
         style: {},
         component: {
-            event: ['click'],
+            event: [{ label: 'click', value: 'click' }],
             methods: [],
         },
     };

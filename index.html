@@ -34,6 +34,18 @@
     <script src="../custom-webcomponents/bundle/index.js"></script>
     <script>
         with(bundle){
+            class MySelect999 extends MySelect{
+                constructor(){
+                    super();
+                }
+            }
+            customElements.define('my-select-999', MySelect999)
+            class MySelect888 extends MySelect{
+                constructor(){
+                    super();
+                }
+            }
+            customElements.define('my-select-888', MySelect888)
             class MyDialogModel99 extends MyDialogModel{
                 constructor(){
                     super();
@@ -87,9 +99,9 @@
                     super();
                     this.options = [
                         {
-                            id: 'dialog',
+                            id: 'dialog_model',
                             type: 'combo',
-                            title: 'dialog',
+                            title: 'dialog_model',
                             img: '../menu/dialog.svg',
                         },
                     ];

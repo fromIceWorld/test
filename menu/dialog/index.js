@@ -1,12 +1,12 @@
-class DIALOG_CONFIG extends COMBINATION_CONFIG {
+class DIALOG_MODEL_CONFIG extends COMBINATION_CONFIG {
     static index = 0;
     index;
     tagName;
     constructor() {
         super();
-        this.tagName = `my-dialog-model-${DIALOG_CONFIG.index}`;
-        this.index = DIALOG_CONFIG.index;
-        DIALOG_CONFIG.index++;
+        this.tagName = `my-dialog-model-${DIALOG_MODEL_CONFIG.index}`;
+        this.index = DIALOG_MODEL_CONFIG.index;
+        DIALOG_MODEL_CONFIG.index++;
     }
     json = {
         attributes: {
@@ -67,9 +67,9 @@ class DIALOG_CONFIG extends COMBINATION_CONFIG {
         return config;
     }
 }
-configModule['DIALOG_CONFIG'] = DIALOG_CONFIG;
+configModule['DIALOG_MODEL_CONFIG'] = DIALOG_MODEL_CONFIG;
 G6.registerCombo(
-    'dialog',
+    'dialog_model',
     {
         options: {
             style: {

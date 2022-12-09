@@ -50,8 +50,24 @@ class FORM_CONFIG extends COMBINATION_CONFIG {
             display: 'flex',
         },
         component: {
-            event: ['submit', 'reset'],
-            methods: ['submit'],
+            event: [
+                {
+                    label: 'submit',
+                    value: 'submit',
+                    children: [{ label: '200' }, { label: '500' }],
+                },
+                {
+                    label: 'reset',
+                    value: 'reset',
+                    children: [],
+                },
+            ],
+            methods: [
+                {
+                    label: 'submit',
+                    value: 'submit',
+                },
+            ],
         },
     };
     // 返回combo节点渲染data

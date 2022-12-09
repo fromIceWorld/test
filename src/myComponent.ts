@@ -11,9 +11,7 @@ import { CheckDetectChange, Component, Inject, ViewChild } from 'mark5';
             <f-button type="link">
                 <img title="恢复数据" class="btn" src='../menu/recovery.svg' width="20px" @click="recoverData($event)"></img>
             </f-button>
-            <f-button type="link">
-                <img title="清除画布" class="btn" src='../menu/clear.svg' width="20px" @click="clearGraph($event)"></img>
-            </f-button>
+            
             <f-button type="link">
                 <img title="导出数据" class="btn" src='../menu/export.svg' width="20px" @click="exportData($event)"></img>
             </f-button>
@@ -128,19 +126,12 @@ import { CheckDetectChange, Component, Inject, ViewChild } from 'mark5';
          <my-dialog-model-99 #dialog>
             <div>
                 <span class="label">source:</span>
-                <f-select %="sourceSelect">
-                    <f-option *forOf="sourceList" &value="item">
-                        {{ item }}
-                    </f-option>
-                </f-select>
+                <my-select-999 #source1 @change="levelChange($event,'1')"></my-select-999>
+                <span class="label">target:</span>
+                <my-select-888 #target1></my-select-888>
             </div>
             <div>
-                <span class="label">target:</span>
-                <f-select %="targetSelect">
-                    <f-option *forOf="targetList" &value="item">
-                        {{ item }}
-                    </f-option>
-                </f-select>
+                
             </div>
             <f-button @click="createEdge($event)">确认</f-button>
          </my-dialog-model-99>
@@ -172,6 +163,10 @@ import { CheckDetectChange, Component, Inject, ViewChild } from 'mark5';
     `,
 })
 class MyComponent {
+    @ViewChild('source1')
+    source1;
+    @ViewChild('target1')
+    target1;
     @ViewChild('design-view')
     board;
     @ViewChild('relation-ship')
@@ -208,50 +203,6 @@ class MyComponent {
     config = [];
     sourceList = [];
     targetList = [];
-    collapses = [
-        {
-            id: 'input',
-            type: 'node',
-            title: '输入框',
-            img: '../menu/input.svg',
-        },
-        {
-            id: 'radio',
-            type: 'node',
-            title: '单选框',
-            img: '../menu/radio.svg',
-        },
-        {
-            id: 'text',
-            type: 'node',
-            title: '文本',
-            img: '../menu/text.svg',
-        },
-        {
-            id: 'form',
-            type: 'combo',
-            title: 'form',
-            img: '../menu/form.svg',
-        },
-        {
-            id: 'input_box',
-            type: 'combo',
-            title: '布局容器',
-            img: '../menu/input-box.svg',
-        },
-        {
-            id: 'button',
-            type: 'node',
-            title: '按钮',
-            img: '../menu/button.svg',
-        },
-        {
-            id: 'dialog',
-            type: 'combo',
-            title: 'dialog',
-            img: '../menu/dialog.svg',
-        },
-    ];
     newEdge;
     sourceSelect;
     targetSelect;
@@ -280,6 +231,10 @@ class MyComponent {
             });
         scaleXgraph.read(this.scaleXdata);
         scaleYgraph.read(this.scaleYdata);
+    }
+    levelChange(e) {
+        const { value, source } = e.detail;
+        console.log(value, source);
     }
     changeView(e) {
         if (this.tabView === 'design-view') {
@@ -741,8 +696,8 @@ class MyComponent {
                     targetNode._cfg.model.config.abstract.component,
                 edges = graph.save().edges;
 
-            this.sourceList = sourceOutput;
-            this.targetList = targetOutput;
+            this.source1.changeOptions(sourceOutput);
+            this.target1.changeOptions(targetOutput);
             G6.Util.processParallelEdges(edges);
             graph.getEdges().forEach((edge, i) => {
                 graph.updateItem(edge, {
@@ -755,6 +710,19 @@ class MyComponent {
             console.log(this.dialog);
 
             // this.cd.detectChanges();
+        });
+        graph.on('edge:click', (evt) => {
+            const { source, target, label } = evt.item._cfg.model;
+            const sourceNode = graph.findById(source),
+                targetNode = graph.findById(target);
+            const { event: sourceOutput } =
+                    sourceNode._cfg.model.config.abstract.component,
+                { methods: targetOutput } =
+                    targetNode._cfg.model.config.abstract.component;
+            this.sourceList = sourceOutput;
+            this.targetList = targetOutput;
+            console.log(source, sourceNode, target, targetNode, label);
+            this.dialog.visibleChange();
         });
     }
     graphAddEventListener() {

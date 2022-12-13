@@ -124,14 +124,13 @@ import { CheckDetectChange, Component, Inject, ViewChild } from 'mark5';
         </div>
          <!-- 连线弹窗 事件 -->
          <my-dialog-model-99 #dialog>
-            <div>
+            <div style="display:flex">
                 <span class="label">source:</span>
-                <my-select-999 #source1 @change="levelChange($event,'1')"></my-select-999>
+                <my-select-999 #source1 @change="levelChange($event,'0')"></my-select-999>
                 <span class="label">target:</span>
-                <my-select-888 #target1></my-select-888>
+                <my-select-888 #target1 @change="levelChange($event,'1')"></my-select-888>
             </div>
-            <div>
-                
+            <div #respond>
             </div>
             <f-button @click="createEdge($event)">确认</f-button>
          </my-dialog-model-99>
@@ -160,6 +159,7 @@ import { CheckDetectChange, Component, Inject, ViewChild } from 'mark5';
             <f-button @click="createEdge($event)">确认</f-button>
         </f-dialog>
         <h1>测试区</h1>
+        <my-select-55></my-select-55>
     `,
 })
 class MyComponent {
@@ -167,6 +167,8 @@ class MyComponent {
     source1;
     @ViewChild('target1')
     target1;
+    @ViewChild('respond')
+    respond;
     @ViewChild('design-view')
     board;
     @ViewChild('relation-ship')
@@ -177,6 +179,8 @@ class MyComponent {
     scaleY;
     @ViewChild('dialog')
     dialog;
+    level2 = [];
+    eventLine = [[]];
     tabView: string = 'design-view';
     dragTarget: EventTarget | null = null;
     data = {
@@ -203,6 +207,8 @@ class MyComponent {
     config = [];
     sourceList = [];
     targetList = [];
+    sourceOutput = [];
+    targetOutput = [];
     newEdge;
     sourceSelect;
     targetSelect;
@@ -232,9 +238,58 @@ class MyComponent {
         scaleXgraph.read(this.scaleXdata);
         scaleYgraph.read(this.scaleYdata);
     }
-    levelChange(e) {
+    levelChange(e, index) {
         const { value, source } = e.detail;
-        console.log(value, source);
+        let target = source.options.filter((item) => item.label === value)[0];
+        this.eventLine[0][index] = value;
+        if (index == '1') {
+            return;
+        }
+        // 切换 respond 选项
+        this.level2 = target.children || [];
+        if (this.level2.length) {
+            let tmplate: string[] = [],
+                tagNames: string[] = [],
+                js = (target.children || [])
+                    .map((item, index) => {
+                        const { html, js, tagName } = bundle[
+                            'MySelect'
+                        ].extends({
+                            options: JSON.stringify(this.targetOutput),
+                        });
+                        this.eventLine.push([this.level2[index].label]);
+                        tagNames.push(tagName);
+                        tmplate.push(
+                            `<span>${this.level2[index].label}: </span>${html}`
+                        );
+                        return js;
+                    })
+                    .join('');
+            let div = document.createElement('div'),
+                script = document.createElement('script');
+            div.innerHTML = tmplate.join('');
+            script.innerHTML = `with(bundle){
+            ${js}
+        }`;
+            this.respond.append(script, div);
+            tagNames.forEach((tagName, index) => {
+                let dom = this.respond.querySelector(tagName);
+                dom.addEventListener('change', (e) => {
+                    const { value } = e.detail;
+                    this.eventLine[index + 1][1] = value;
+                    console.log(this.eventLine);
+                });
+            });
+        } else {
+            if (!this.respond.children.length) {
+                return;
+            }
+            this.respond.children[1].remove();
+            this.respond.children[0].remove();
+            this.eventLine = [this.eventLine[0]];
+        }
+        console.log(this.eventLine);
+        this.cd.detectChanges();
     }
     changeView(e) {
         if (this.tabView === 'design-view') {
@@ -323,6 +378,7 @@ class MyComponent {
                 label,
             };
         });
+        console.log('edges', edges);
         let h = document.createElement('div'),
             hHTML = ``,
             s = document.createElement('script'),
@@ -335,30 +391,27 @@ class MyComponent {
         const events = edges
             .map((edge) => {
                 const { source, target, label } = edge,
-                    [event, method] = label.split('->');
+                    eventsArray = label
+                        .split('\n')
+                        .map((eventToFn: string) => eventToFn.split('->'));
                 const js = `
-                let ${source.replace(
-                    /-/g,
-                    '_'
-                )} = document.querySelector('${source}'),
-                    ${target.replace(
-                        /-/g,
-                        '_'
-                    )} = document.querySelector('${target}');
-                // 初始化事件
-                ${source.replace(/-/g, '_')}.init${event.replace(
-                    /^[a-z]/,
-                    (s) => s.toLocaleUpperCase()
-                )}Event();
-                ${source.replace(
-                    /-/g,
-                    '_'
-                )}.addEventListener('when${event.replace(/^[a-z]/, (s) =>
-                    s.toLocaleUpperCase()
-                )}', (e)=> ${target.replace(
-                    /-/g,
-                    '_'
-                )}.${method}(e, '${target}', '${method}'))    
+                sourceDOM = document.querySelector('${source}');
+                targetDOM = document.querySelector('${target}');
+                //初始化事件
+                ${JSON.stringify(eventsArray)}.forEach((fnTofn, index)=>{
+                    const [event,fn] = fnTofn;
+                    if(index === 0){
+                        sourceDOM.addEventListener(event, (e)=>{
+                            targetDOM[fn]();
+                        })
+                    }else{
+                        sourceDOM.addEventListener(${JSON.stringify(
+                            eventsArray[0][0]
+                        )} + event, (e)=>{
+                            targetDOM[fn]();
+                        })
+                    }
+                });
             `;
                 sScript += js;
                 return js;
@@ -678,7 +731,9 @@ class MyComponent {
     createEdge(e) {
         this.newEdge.update({
             ...this.newEdge._cfg.model,
-            label: `${this.sourceSelect}->${this.targetSelect}`,
+            label: `${this.eventLine
+                .map((item) => item.join('->'))
+                .join('\n')}`,
         });
         this.diaDisplay = false;
         this.cd.detectChanges();
@@ -695,10 +750,11 @@ class MyComponent {
                 { methods: targetOutput } =
                     targetNode._cfg.model.config.abstract.component,
                 edges = graph.save().edges;
-
+            this.sourceOutput = sourceOutput;
+            this.targetOutput = targetOutput;
             this.source1.changeOptions(sourceOutput);
             this.target1.changeOptions(targetOutput);
-            G6.Util.processParallelEdges(edges);
+            G6.Util.processParallelEdges(edges, 50);
             graph.getEdges().forEach((edge, i) => {
                 graph.updateItem(edge, {
                     curveOffset: edges[i].curveOffset,

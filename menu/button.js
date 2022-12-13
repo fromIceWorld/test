@@ -110,7 +110,11 @@ class BUTTON_CONFIG extends NODE_CONFIG {
         style: {},
         component: {
             event: [{ label: 'click', value: 'click' }],
-            methods: [],
+            methods: [
+                { label: 'loading', value: 'loading' },
+                { label: 'normal', value: 'normal' },
+                { label: 'disabled', value: 'disabled' },
+            ],
         },
     };
     render() {

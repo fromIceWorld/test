@@ -24,8 +24,16 @@ class DIALOG_MODEL_CONFIG extends COMBINATION_CONFIG {
             display: 'flex',
         },
         component: {
-            event: ['visible', 'hiden', 'visibleChange'],
-            methods: ['visible', 'hiden', 'visibleChange'],
+            event: [
+                { label: 'visible', value: 'visible' },
+                { label: 'hiden', value: 'hiden' },
+                { label: 'visibleChange', value: 'visibleChange' },
+            ],
+            methods: [
+                { label: 'visible', value: 'visible' },
+                { label: 'hiden', value: 'hiden' },
+                { label: 'visibleChange', value: 'visibleChange' },
+            ],
         },
     };
     // 返回combo节点渲染data

@@ -58,25 +58,25 @@
                 constructor(){
                     super();
                     this.options = [
-                    {
-                    id: 'form',
-                    type: 'combo',
-                    title: 'form',
-                    img: '../menu/form.svg',
-                },
-                {
-                    id: 'input',
-                    type: 'node',
-                    title: '输入框',
-                    img: '../menu/input.svg',
-                },
-                {
-                    id: 'radio',
-                    type: 'node',
-                    title: '单选框',
-                    img: '../menu/radio.svg',
-                },
-            ];
+                            {
+                            id: 'form',
+                            type: 'combo',
+                            title: 'form',
+                            img: '../menu/form.svg',
+                            },
+                            {
+                                id: 'input',
+                                type: 'node',
+                                title: '输入框',
+                                img: '../menu/input.svg',
+                            },
+                            {
+                                id: 'radio',
+                                type: 'node',
+                                title: '单选框',
+                                img: '../menu/radio.svg',
+                            },
+                    ];
                 }
             }
             customElements.define('my-for-99', MyFor99)
@@ -148,6 +148,19 @@
                 }
             }
             customElements.define('my-for-66', MyFor66)
+            class MyFor55 extends MyFor{
+                constructor(){
+                    super();
+                   
+                }
+            }
+            customElements.define('my-for-55', MyFor55)
+            class MySelect55 extends MySelect{
+                constructor(){
+                    super();
+                }
+            }
+            customElements.define('my-select-55', MySelect55)
         }
     </script>
     <script src="./g6.min.js"></script>

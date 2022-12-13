@@ -89,8 +89,18 @@ class INPUT_CONFIG extends NODE_CONFIG {
         classes: '',
         style: {},
         component: {
-            event: ['validate', 'change', 'clear', 'blur'],
-            methods: [],
+            event: [
+                { label: 'validate', value: 'validate' },
+                { label: 'change', value: 'change' },
+                { label: 'clear', value: 'clear' },
+                { label: 'blur', value: 'blur' },
+            ],
+            methods: [
+                { label: 'validate', value: 'validate' },
+                { label: 'change', value: 'change' },
+                { label: 'clear', value: 'clear' },
+                { label: 'blur', value: 'blur' },
+            ],
         },
     };
     // 返回node节点渲染data，和 base config

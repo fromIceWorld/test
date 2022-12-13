@@ -54,7 +54,10 @@ class FORM_CONFIG extends COMBINATION_CONFIG {
                 {
                     label: 'submit',
                     value: 'submit',
-                    children: [{ label: '200' }, { label: '500' }],
+                    children: [
+                        { label: '200', value: '200' },
+                        { label: '500', value: '500' },
+                    ],
                 },
                 {
                     label: 'reset',
@@ -66,6 +69,15 @@ class FORM_CONFIG extends COMBINATION_CONFIG {
                 {
                     label: 'submit',
                     value: 'submit',
+                    children: [
+                        { label: '200', value: '200' },
+                        { label: '500', value: '500' },
+                    ],
+                },
+                {
+                    label: 'reset',
+                    value: 'reset',
+                    children: [],
                 },
             ],
         },

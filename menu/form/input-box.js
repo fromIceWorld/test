@@ -1,53 +1,19 @@
 class INPUT_BOX_CONFIG extends COMBINATION_CONFIG {
-    static index = 0;
-    index;
-    tagName;
-    constructor() {
-        super();
-        this.tagName = `my-input-box-${INPUT_BOX_CONFIG.index}`;
-        this.index = INPUT_BOX_CONFIG.index;
-        INPUT_BOX_CONFIG.index++;
-    }
-    json = {};
-    abstract = {
-        html: {
-            tagName: 'my-input-box',
-            attributes: {},
-        },
+    className = 'MyContainer';
+    html = {
+        attributes: {},
+        properties: {},
+    };
+    css = {
         classes: '',
         style: {
             display: 'flex',
         },
-        component: {
-            event: [],
-            methods: [],
-        },
     };
-    render(combo) {
-        let flexDirection = this.abstract.style['flex-direction'],
-            config = {
-                html: `<${this.tagName} style="display:flex;${
-                    flexDirection
-                        ? flexDirection === 'row'
-                            ? 'flex-direction:row'
-                            : 'flex-direction:column'
-                        : ''
-                }">`,
-                js: ``,
-            };
-        const { nodes: nextNodes, combos: nextCombos } =
-            this.getNextChildren(combo);
-        let childConfig = [...nextNodes, ...nextCombos].map((next) =>
-            next._cfg.model.config.render(next)
-        );
-        childConfig.forEach((child) => {
-            const { html, js } = child;
-            config.html += html;
-            config.js += js;
-        });
-        config.html += `</${this.tagName}>`;
-        return config;
-    }
+    component = {
+        event: [],
+        methods: [],
+    };
 }
 configModule['INPUT_BOX_CONFIG'] = INPUT_BOX_CONFIG;
 

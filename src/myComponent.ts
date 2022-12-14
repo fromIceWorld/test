@@ -159,7 +159,6 @@ import { CheckDetectChange, Component, Inject, ViewChild } from 'mark5';
             <f-button @click="createEdge($event)">确认</f-button>
         </f-dialog>
         <h1>测试区</h1>
-        <my-select-55></my-select-55>
     `,
 })
 class MyComponent {
@@ -213,6 +212,7 @@ class MyComponent {
     sourceSelect;
     targetSelect;
     diaDisplay: boolean = false;
+    idMapTag: Map<string, string> = new Map();
     constructor(@Inject(CheckDetectChange) private cd: CheckDetectChange) {}
     renderScale() {
         const width = 1920,
@@ -359,16 +359,25 @@ class MyComponent {
         // 节点数据
         const nodes = this.graph.getNodes(),
             combos = this.graph.getCombos();
-        console.log(nodes, combos);
         let topNodes = nodes.filter((node) => !node._cfg.model.comboId);
         let topCombos = combos.filter((combo) => !combo._cfg.model.parentId);
-        // 节点原型连接
-        this.setPrototypeOfConfig(nodes, combos);
-        // 输出组件 template， data， js
-        const renderConfig = [...topNodes, ...topCombos].map((item) =>
-            item._cfg.model.config.render(item)
-        );
-        window['renderConfig'] = renderConfig;
+        let [html, js] = [...topNodes, ...topCombos]
+            .map((item) => {
+                if (item._cfg.type === 'combo') {
+                    return this.exportCombo(item);
+                } else {
+                    return this.exportNode(item);
+                }
+            })
+            .reduce(
+                (pre, cur) => {
+                    let [htmlString, jsString] = pre,
+                        { html, js } = cur;
+                    return [htmlString + html, jsString + js];
+                },
+                ['', '']
+            );
+        console.log([html, js]);
         // 连线数据
         const edges = this.relationshipGraph.getEdges().map((edge) => {
             const { source, target, label } = edge._cfg.model;
@@ -378,25 +387,20 @@ class MyComponent {
                 label,
             };
         });
-        console.log('edges', edges);
-        let h = document.createElement('div'),
-            hHTML = ``,
-            s = document.createElement('script'),
-            sScript = ``;
-        renderConfig.forEach((item) => {
-            const { html, js } = item;
-            hHTML += html;
-            sScript += js;
-        });
-        const events = edges
+        console.log(this.idMapTag);
+        edges
             .map((edge) => {
                 const { source, target, label } = edge,
                     eventsArray = label
                         .split('\n')
                         .map((eventToFn: string) => eventToFn.split('->'));
-                const js = `
-                sourceDOM = document.querySelector('${source}');
-                targetDOM = document.querySelector('${target}');
+                const eventJs = `
+                sourceDOM = document.querySelector('${this.idMapTag.get(
+                    source
+                )}');
+                targetDOM = document.querySelector('${this.idMapTag.get(
+                    target
+                )}');
                 //初始化事件
                 ${JSON.stringify(eventsArray)}.forEach((fnTofn, index)=>{
                     const [event,fn] = fnTofn;
@@ -413,53 +417,57 @@ class MyComponent {
                     }
                 });
             `;
-                sScript += js;
-                return js;
+                js += eventJs;
             })
             .join();
-        h.innerHTML = hHTML;
-        s.innerHTML = `with(bundle){${sScript}}`;
-        document.body.append(h, s);
-        console.log(renderConfig, events);
-    }
-    // 储存的JSON数据无自己的原型，需要手动连接
-    setPrototypeOfConfig(nodes, combos) {
-        for (let node of [...nodes, ...combos]) {
-            const { id } = node._cfg;
-            const [, name] = id.match(/^my\-([a-z-]+)\-[0-9]+/),
-                source =
-                    configModule[
-                        name
-                            .split('-')
-                            .map((s: string) => s.toLocaleUpperCase())
-                            .join('_') + '_CONFIG'
-                    ];
-            let config = node._cfg.model.config;
-            config.__pro;
-            Object.setPrototypeOf(config, source.prototype);
-        }
+        let dom = document.createElement('div'),
+            script = document.createElement('script');
+        dom.innerHTML = html;
+        script.innerHTML = `with(bundle){${js}}`;
+        document.body.append(dom, script);
     }
     exportCombo(combo) {
-        let s = '',
-            { config } = combo._cfg.model,
-            { abstract } = config,
-            { html, style } = abstract,
+        let htmlString = '',
+            scriptString = '',
+            { html, css, component, className } = combo._cfg.model.config,
             { nodes, combos } = combo.getChildren();
-        s += `<${html.tagName} style="${Object.entries(style)
-            .map(([key, value]) => {
-                return key + ':' + value;
-            })
-            .join(';')}">`;
+        // 建立 node id与tagName的映射
+        const originClass = bundle[className],
+            prefix = originClass.tagNamePrefix,
+            index = originClass.index;
+        this.idMapTag.set(combo._cfg.id, prefix + '-' + index);
+        //  导出当前combo数据
+        let { html: s, js } = bundle[className].extends({ html, css });
+        const [origin, start, end] = s.match(
+            /^(\<[a-z-0-9 ="';:]+\>[\s\S]*)(\<\/([a-z-0-9]+)\>)$/
+        );
+        htmlString += start;
+        scriptString += js;
+        // 导出子节点，combo
         nodes.forEach((node) => {
-            const { config } = node._cfg.model,
-                { json, abstract } = config;
-            s += config.render(abstract, json);
+            let { html, js } = this.exportNode(node);
+            htmlString += html;
+            scriptString += js;
         });
-        combos.forEach((item) => {
-            s += this.exportCombo(item);
+        combos.forEach((combo) => {
+            let { html, js } = this.exportCombo(combo);
+            htmlString += html;
+            scriptString += js;
         });
-        s += `</${html.tagName}>`;
-        return s;
+        htmlString += end;
+        return {
+            html: htmlString,
+            js: scriptString,
+        };
+    }
+    // 导出节点数据
+    exportNode(node) {
+        let { html, css, className } = node._cfg.model.config;
+        const origin = bundle[className],
+            prefix = origin.tagNamePrefix,
+            index = origin.index;
+        this.idMapTag.set(node._cfg.id, prefix + '-' + index);
+        return bundle[className].extends({ html, css });
     }
     emit(e: EventTarget, value: any) {
         console.log(e, value, this);
@@ -480,9 +488,8 @@ class MyComponent {
                 elements = nodes.concat(combos);
             if (value.layout == 'row') {
                 // 修改combo layout json
-                this.focusCombo._cfg.model.config.abstract.style[
-                    'flex-direction'
-                ] = 'row';
+                this.focusCombo._cfg.model.config.css.style['flex-direction'] =
+                    'row';
                 console.log(this.focusCombo._cfg.model);
                 elements.reduce((pre, element) => {
                     const { bboxCanvasCache, model, type } = element._cfg,
@@ -506,9 +513,8 @@ class MyComponent {
                 }, minX);
             } else {
                 // 修改combo layout json
-                this.focusCombo._cfg.model.config.abstract.style[
-                    'flex-direction'
-                ] = 'column';
+                this.focusCombo._cfg.model.config.css.style['flex-direction'] =
+                    'column';
                 elements.reduce((pre: number, element) => {
                     const { bboxCanvasCache, model, type } = element._cfg,
                         { x } = model,
@@ -572,7 +578,7 @@ class MyComponent {
         let target = this.focusCombo ? 'focusCombo' : 'focusNode';
         const model = this[target]._cfg.model,
             config = model.config,
-            json = model.config.json;
+            json = model.config.html;
         let { dom, value } = e.detail,
             { obj } = value;
         Object.assign(json[obj], value[obj]);
@@ -746,9 +752,9 @@ class MyComponent {
             const newEdge = e.edge,
                 { sourceNode, targetNode } = newEdge._cfg,
                 { event: sourceOutput } =
-                    sourceNode._cfg.model.config.abstract.component,
+                    sourceNode._cfg.model.config.component,
                 { methods: targetOutput } =
-                    targetNode._cfg.model.config.abstract.component,
+                    targetNode._cfg.model.config.component,
                 edges = graph.save().edges;
             this.sourceOutput = sourceOutput;
             this.targetOutput = targetOutput;
@@ -772,9 +778,9 @@ class MyComponent {
             const sourceNode = graph.findById(source),
                 targetNode = graph.findById(target);
             const { event: sourceOutput } =
-                    sourceNode._cfg.model.config.abstract.component,
+                    sourceNode._cfg.model.config.component,
                 { methods: targetOutput } =
-                    targetNode._cfg.model.config.abstract.component;
+                    targetNode._cfg.model.config.component;
             this.sourceList = sourceOutput;
             this.targetList = targetOutput;
             console.log(source, sourceNode, target, targetNode, label);
@@ -800,7 +806,7 @@ class MyComponent {
         graph.on('node:click', (evt) => {
             this.focusCombo = null;
             const { item } = evt,
-                json = item._cfg.model.config.json,
+                json = item._cfg.model.config.html,
                 { attributes, properties } = json;
             console.log(item);
             this.unFocus(this.focusNode);
@@ -818,7 +824,7 @@ class MyComponent {
             console.log(this.eventNodes);
             // 展示combo  json 数据
             const { item } = evt,
-                json = item._cfg.model.config.json,
+                json = item._cfg.model.config.html,
                 { attributes, properties } = json;
             this.config = [attributes, properties];
             this.cd.detectChanges();
@@ -908,11 +914,11 @@ class MyComponent {
                     const nodeSetting = new configModule[
                             id.toLocaleUpperCase() + '_CONFIG'
                         ](),
-                        componentConfig = nodeSetting.abstract.component;
+                        { className, html, css, component } = nodeSetting;
                     let config = {
                         x: targetX,
                         y: targetY,
-                        id: nodeSetting.tagName,
+                        id: String(Math.random()),
                         type: id,
                         config: nodeSetting,
                     };
@@ -927,9 +933,8 @@ class MyComponent {
                         });
                     }
                     if (
-                        componentConfig &&
-                        (componentConfig.event.length ||
-                            componentConfig.methods.length)
+                        component &&
+                        (component.event.length || component.methods.length)
                     ) {
                         that.relationshipGraph.addItem('node', {
                             ...config,

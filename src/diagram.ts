@@ -122,7 +122,7 @@ export class Diagram {
         });
         graph.on('node:click', (evt) => {
             this.focusNode = evt.item;
-            const { component = {} } = evt.item._cfg.model.config.abstract,
+            const { component = {} } = evt.item._cfg.model.config,
                 { input: inputOptions = [], output: outputOptions = [] } =
                     component;
             this.config = {

@@ -1,79 +1,29 @@
 class DIALOG_MODEL_CONFIG extends COMBINATION_CONFIG {
-    static index = 0;
-    index;
-    tagName;
-    constructor() {
-        super();
-        this.tagName = `my-dialog-model-${DIALOG_MODEL_CONFIG.index}`;
-        this.index = DIALOG_MODEL_CONFIG.index;
-        DIALOG_MODEL_CONFIG.index++;
-    }
-    json = {
+    className = 'MyDialogModel';
+    html = {
         attributes: {
             title: '对话框',
         },
         properties: {},
     };
-    abstract = {
-        html: {
-            tagName: 'my-dialog-model',
-            attributes: {},
-        },
+    css = {
         classes: '',
         style: {
             display: 'flex',
         },
-        component: {
-            event: [
-                { label: 'visible', value: 'visible' },
-                { label: 'hiden', value: 'hiden' },
-                { label: 'visibleChange', value: 'visibleChange' },
-            ],
-            methods: [
-                { label: 'visible', value: 'visible' },
-                { label: 'hiden', value: 'hiden' },
-                { label: 'visibleChange', value: 'visibleChange' },
-            ],
-        },
     };
-    // 返回combo节点渲染data
-    render(combo) {
-        const { attributes, properties } = this.json,
-            tagName = this.tagName,
-            { title } = attributes,
-            flexDirection = this.abstract.style['flex-direction'],
-            { api } = properties;
-        let config = {
-            html: `<${tagName} style="display:flex;${
-                flexDirection
-                    ? flexDirection === 'row'
-                        ? 'flex-direction:row'
-                        : 'flex-direction:column'
-                    : ''
-            }">`,
-            js: `class MyDialogModel${this.index} extends MyDialogModel{
-                    constructor(){
-                        super();
-                        this.MyTitle = '${title}';
-                        this.init();
-                    }
-                 }
-                 customElements.define('${tagName}',MyDialogModel${this.index})
-                 `,
-        };
-        const { nodes: nextNodes, combos: nextCombos } =
-            this.getNextChildren(combo);
-        let childConfig = [...nextNodes, ...nextCombos].map((next) =>
-            next._cfg.model.config.render(next)
-        );
-        childConfig.forEach((child) => {
-            const { html, js } = child;
-            config.html += html;
-            config.js += js;
-        });
-        config.html += `</${tagName}>`;
-        return config;
-    }
+    component = {
+        event: [
+            { label: 'visible', value: 'visible' },
+            { label: 'hiden', value: 'hiden' },
+            { label: 'visibleChange', value: 'visibleChange' },
+        ],
+        methods: [
+            { label: 'visible', value: 'visible' },
+            { label: 'hiden', value: 'hiden' },
+            { label: 'visibleChange', value: 'visibleChange' },
+        ],
+    };
 }
 configModule['DIALOG_MODEL_CONFIG'] = DIALOG_MODEL_CONFIG;
 G6.registerCombo(

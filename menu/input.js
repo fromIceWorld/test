@@ -10,7 +10,7 @@ G6.registerNode(
         },
         afterDraw(cfg, group) {
             const { config } = cfg,
-                { attributes } = config.json,
+                { attributes } = config.html,
                 { placeholder } = attributes;
             cfg.padding = [0, 0, 0, 0];
             group.addShape('text', {
@@ -42,8 +42,8 @@ G6.registerNode(
         },
         update(cfg, node) {
             console.log('input update', cfg);
-            const { json } = cfg.config,
-                { attributes, properties } = json,
+            const { html } = cfg.config,
+                { attributes, properties } = html,
                 { placeholder } = attributes,
                 group = node.getContainer();
             let textShape = group.findById('text');
@@ -59,16 +59,8 @@ G6.registerNode(
     'rect'
 );
 class INPUT_CONFIG extends NODE_CONFIG {
-    static index = 0;
-    index;
-    tagName;
-    constructor() {
-        super();
-        this.tagName = `my-input-${INPUT_CONFIG.index}`;
-        this.index = INPUT_CONFIG.index;
-        INPUT_CONFIG.index++;
-    }
-    json = {
+    className = 'MyInput';
+    html = {
         attributes: {
             placeholder: '请输入姓名',
             formcontrol: 'name',
@@ -79,56 +71,23 @@ class INPUT_CONFIG extends NODE_CONFIG {
             regexp: '^[1-9]{1,10}$',
         },
     };
-    abstract = {
-        html: {
-            tagName: 'input',
-            attributes: {
-                type: 'text',
-            },
-        },
+    css = {
         classes: '',
         style: {},
-        component: {
-            event: [
-                { label: 'validate', value: 'validate' },
-                { label: 'change', value: 'change' },
-                { label: 'clear', value: 'clear' },
-                { label: 'blur', value: 'blur' },
-            ],
-            methods: [
-                { label: 'validate', value: 'validate' },
-                { label: 'change', value: 'change' },
-                { label: 'clear', value: 'clear' },
-                { label: 'blur', value: 'blur' },
-            ],
-        },
     };
-    // 返回node节点渲染data，和 base config
-    render() {
-        const index = this.index,
-            tagName = this.tagName,
-            { attributes, properties } = this.json,
-            { placeholder, formcontrol } = attributes,
-            { value, updateOn, regexp } = properties;
-        let config = {
-            html: `<input 
-                        is=${tagName}"
-                        type="text"
-                        placeholder="${placeholder}"
-                        formcontrol="${formcontrol}"
-                   ></input>`,
-            js: `class MyInput${index} extends MyInput{
-                constructor(){
-                    super();
-                    this.value = '${value}';
-                    this.regexp = '${regexp}';
-                    this.updateOn = '${updateOn}';
-                }
-            };
-            customElements.define('${tagName}',MyInput${this.index},{ extends: 'input' })
-            `,
-        };
-        return config;
-    }
+    component = {
+        event: [
+            { label: 'validate', value: 'validate' },
+            { label: 'change', value: 'change' },
+            { label: 'clear', value: 'clear' },
+            { label: 'blur', value: 'blur' },
+        ],
+        methods: [
+            { label: 'validate', value: 'validate' },
+            { label: 'change', value: 'change' },
+            { label: 'clear', value: 'clear' },
+            { label: 'blur', value: 'blur' },
+        ],
+    };
 }
 configModule['INPUT_CONFIG'] = INPUT_CONFIG;

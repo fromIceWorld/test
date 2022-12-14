@@ -13,7 +13,7 @@ G6.registerNode(
         },
         draw: function (cfg, group) {
             const self = this,
-                { attributes, properties } = cfg.config.json,
+                { attributes, properties } = cfg.config.html,
                 { options } = properties;
             // 获取配置中的 Combo 内边距
             cfg.padding = [0, 0, 0, 0];
@@ -35,11 +35,11 @@ G6.registerNode(
             });
         },
         afterDraw(cfg, group) {
-            renderRadio(group, cfg.config.json, false);
+            renderRadio(group, cfg.config.html, false);
         },
         update(cfg, node) {
             const group = node.get('group');
-            renderRadio(group, cfg.config.json, true);
+            renderRadio(group, cfg.config.html, true);
         },
         afterUpdate(cfg, item) {},
     },
@@ -109,16 +109,8 @@ function computedWidth(optionsString) {
     return width;
 }
 class RADIO_CONFIG extends NODE_CONFIG {
-    static index = 0;
-    index;
-    tagName;
-    constructor() {
-        super();
-        this.tagName = `my-radio-${RADIO_CONFIG.index}`;
-        this.index = RADIO_CONFIG.index;
-        RADIO_CONFIG.index++;
-    }
-    json = {
+    className = 'MyRadio';
+    html = {
         attributes: {
             formcontrol: 'sex',
         },
@@ -129,38 +121,13 @@ class RADIO_CONFIG extends NODE_CONFIG {
             ]),
         },
     };
-    abstract = {
-        html: {
-            tagName: 'input',
-            attributes: {
-                type: 'radio',
-            },
-        },
+    css = {
         classes: '',
         style: {},
-        component: {
-            event: [{ label: 'change', value: 'change' }],
-            methods: [],
-        },
     };
-    render() {
-        const { attributes, properties } = this.json,
-            tagName = this.tagName,
-            { formcontrol } = attributes,
-            { options } = properties;
-        let config = {
-            html: `<${tagName} formcontrol='${formcontrol}'>`,
-            js: `class MyRadio${this.index} extends MyRadio{
-                constructor(){
-                    super();
-                    this.options = ${options}
-                }
-            }
-            customElements.define('${tagName}',MyRadio${this.index})
-            `,
-        };
-        config.html += `</${tagName}>`;
-        return config;
-    }
+    component = {
+        event: [{ label: 'change', value: 'change' }],
+        methods: [],
+    };
 }
 configModule['RADIO_CONFIG'] = RADIO_CONFIG;

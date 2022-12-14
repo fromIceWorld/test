@@ -11,7 +11,7 @@ G6.registerNode(
         },
         draw(cfg, group) {
             const self = this,
-                { properties } = cfg.config.json,
+                { properties } = cfg.config.html,
                 { name } = properties;
             // 获取配置中的 Combo 内边距
             cfg.padding = [5, 5, 5, 5];
@@ -31,7 +31,7 @@ G6.registerNode(
             });
         },
         afterDraw(cfg, group) {
-            const { properties } = cfg.config.json,
+            const { properties } = cfg.config.html,
                 { name } = properties;
             width = measureText(name, '14px');
             group.addShape('text', {
@@ -50,7 +50,7 @@ G6.registerNode(
             });
         },
         update(cfg, node) {
-            const { properties } = cfg.config.json,
+            const { properties } = cfg.config.html,
                 { name } = properties,
                 textLength = measureText(name, '14px'),
                 group = node.getContainer();
@@ -81,16 +81,8 @@ G6.registerNode(
 
 // 独属于每一个节点的render函数，在G6中会被抹除，通过原型保存
 class BUTTON_CONFIG extends NODE_CONFIG {
-    static index = 0;
-    index;
-    tagName;
-    constructor() {
-        super();
-        this.tagName = `my-button-${BUTTON_CONFIG.index}`;
-        this.index = BUTTON_CONFIG.index;
-        BUTTON_CONFIG.index++;
-    }
-    json = {
+    className = 'MyButton';
+    html = {
         attributes: {},
         properties: {
             name: '确定',
@@ -99,43 +91,17 @@ class BUTTON_CONFIG extends NODE_CONFIG {
             type: '',
         },
     };
-    abstract = {
-        html: {
-            tagName: 'input',
-            attributes: {
-                type: 'button',
-            },
-        },
+    css = {
         classes: '',
         style: {},
-        component: {
-            event: [{ label: 'click', value: 'click' }],
-            methods: [
-                { label: 'loading', value: 'loading' },
-                { label: 'normal', value: 'normal' },
-                { label: 'disabled', value: 'disabled' },
-            ],
-        },
     };
-    render() {
-        const { properties } = this.json,
-            tagName = this.tagName,
-            { name, icon, shape, type } = properties;
-        let config = {
-            html: `<${tagName}></${tagName}>`,
-            js: `class MyButton${this.index} extends MyButton{
-                    constructor(){
-                        super();
-                        this.name = '${name}';
-                        this.icon = '${icon}';
-                        this.shape = '${shape}';
-                        this.type = '${type}';
-                    }
-                }
-                customElements.define('${tagName}',MyButton${this.index})
-                `,
-        };
-        return config;
-    }
+    component = {
+        event: [{ label: 'click', value: 'click' }],
+        methods: [
+            { label: 'loading', value: 'loading' },
+            { label: 'normal', value: 'normal' },
+            { label: 'disabled', value: 'disabled' },
+        ],
+    };
 }
 configModule['BUTTON_CONFIG'] = BUTTON_CONFIG;

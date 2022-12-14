@@ -23,16 +23,8 @@ class FormGroup {
     }
 }
 class FORM_CONFIG extends COMBINATION_CONFIG {
-    static index = 0;
-    index;
-    tagName;
-    constructor() {
-        super();
-        this.tagName = `my-form-${FORM_CONFIG.index}`;
-        this.index = FORM_CONFIG.index;
-        FORM_CONFIG.index++;
-    }
-    json = {
+    className = 'MyForm';
+    html = {
         attributes: {
             formgroup: 'fg',
         },
@@ -40,85 +32,44 @@ class FORM_CONFIG extends COMBINATION_CONFIG {
             api: '/test/list',
         },
     };
-    abstract = {
-        html: {
-            tagName: 'form',
-            attributes: {},
-        },
+    css = {
         classes: '',
         style: {
             display: 'flex',
         },
-        component: {
-            event: [
-                {
-                    label: 'submit',
-                    value: 'submit',
-                    children: [
-                        { label: '200', value: '200' },
-                        { label: '500', value: '500' },
-                    ],
-                },
-                {
-                    label: 'reset',
-                    value: 'reset',
-                    children: [],
-                },
-            ],
-            methods: [
-                {
-                    label: 'submit',
-                    value: 'submit',
-                    children: [
-                        { label: '200', value: '200' },
-                        { label: '500', value: '500' },
-                    ],
-                },
-                {
-                    label: 'reset',
-                    value: 'reset',
-                    children: [],
-                },
-            ],
-        },
     };
-    // 返回combo节点渲染data
-    render(combo) {
-        const { attributes, properties } = this.json,
-            tagName = this.tagName,
-            { formgroup } = attributes,
-            flexDirection = this.abstract.style['flex-direction'],
-            { api } = properties;
-        let config = {
-            html: `<${tagName} formgroup="${formgroup}" style="display:flex;${
-                flexDirection
-                    ? flexDirection === 'row'
-                        ? 'flex-direction:row'
-                        : 'flex-direction:column'
-                    : ''
-            }">`,
-            js: `class MyForm${this.index} extends MyForm{
-                    constructor(){
-                        super();
-                        this.api = '${api}'
-                    }
-                 }
-                 customElements.define('${tagName}',MyForm${this.index})
-                 `,
-        };
-        const { nodes: nextNodes, combos: nextCombos } =
-            this.getNextChildren(combo);
-        let childConfig = [...nextNodes, ...nextCombos].map((next) =>
-            next._cfg.model.config.render(next)
-        );
-        childConfig.forEach((child) => {
-            const { html, js } = child;
-            config.html += html;
-            config.js += js;
-        });
-        config.html += `</${tagName}>`;
-        return config;
-    }
+    component = {
+        event: [
+            {
+                label: 'submit',
+                value: 'submit',
+                children: [
+                    { label: '200', value: '200' },
+                    { label: '500', value: '500' },
+                ],
+            },
+            {
+                label: 'reset',
+                value: 'reset',
+                children: [],
+            },
+        ],
+        methods: [
+            {
+                label: 'submit',
+                value: 'submit',
+                children: [
+                    { label: '200', value: '200' },
+                    { label: '500', value: '500' },
+                ],
+            },
+            {
+                label: 'reset',
+                value: 'reset',
+                children: [],
+            },
+        ],
+    };
 }
 configModule['FORM_CONFIG'] = FORM_CONFIG;
 G6.registerCombo(

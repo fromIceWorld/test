@@ -10,7 +10,7 @@ G6.registerNode(
         },
         draw(cfg, group) {
             const self = this,
-                { attributes, properties } = cfg.config.json,
+                { attributes, properties } = cfg.config.html,
                 { text } = properties;
             // 获取配置中的 Combo 内边距
             cfg.padding = [5, 5, 5, 5];
@@ -30,7 +30,7 @@ G6.registerNode(
             });
         },
         afterDraw(cfg, group) {
-            const { attributes, properties } = cfg.config.json,
+            const { attributes, properties } = cfg.config.html,
                 { text } = properties;
             width = measureText(text, '14px');
             group.addShape('text', {
@@ -49,7 +49,7 @@ G6.registerNode(
             });
         },
         update(cfg, node) {
-            const { attributes, properties } = cfg.config.json,
+            const { attributes, properties } = cfg.config.html,
                 { text } = properties,
                 textLength = measureText(text, '14px'),
                 group = node.get('group');
@@ -80,42 +80,21 @@ G6.registerNode(
 
 // 独属于每一个节点的render函数，在G6中会被抹除，通过原型保存
 class TEXT_CONFIG extends NODE_CONFIG {
-    static index = 0;
-    index;
-    tagName;
-    constructor() {
-        super();
-        this.tagName = `my-text-${TEXT_CONFIG.index}`;
-        this.index = TEXT_CONFIG.index;
-        TEXT_CONFIG.index++;
-    }
-    json = {
+    className = 'MyText';
+    html = {
         attributes: {},
         properties: {
             model: '',
             text: '姓名',
         },
     };
-    abstract = {
-        html: {
-            tagName: 'span',
-            attributes: {},
-        },
+    css = {
         classes: '',
         style: {},
-        component: {
-            event: [],
-            methods: [],
-        },
     };
-    render() {
-        const { attributes, properties } = this.json,
-            { text } = properties;
-        let config = {
-            html: `<span>${text}</span>`,
-            js: ``,
-        };
-        return config;
-    }
+    component = {
+        event: [],
+        methods: [],
+    };
 }
 configModule['TEXT_CONFIG'] = TEXT_CONFIG;

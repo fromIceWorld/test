@@ -84,7 +84,6 @@ class TEXT_CONFIG extends NODE_CONFIG {
     html = {
         attributes: {},
         properties: {
-            model: '',
             text: '姓名',
         },
     };

@@ -23,7 +23,6 @@ import { CheckDetectChange, Component, Inject, ViewChild } from 'mark5';
             ></img>
             <div class="collapse">
                 <div class="collapse-header" @click="changeCollapse($event,'coll0')">> base</div>
-                    <div *if="coll0">
                         <my-for-00>
                             <div draggable="true">
                                 <img
@@ -35,9 +34,7 @@ import { CheckDetectChange, Component, Inject, ViewChild } from 'mark5';
                                 ></img>
                             </div>
                         </my-for-00>
-                    </div>
                 <div class="collapse-header" @click="changeCollapse($event,'coll')">> form</div>
-                    <div *if="coll">
                         <my-for-99>
                             <div draggable="true">
                                 <img
@@ -49,9 +46,7 @@ import { CheckDetectChange, Component, Inject, ViewChild } from 'mark5';
                                 ></img>
                             </div>
                         </my-for-99>
-                    </div>
                     <div class="collapse-header" @click="changeCollapse($event,'coll2')">> flex</div>
-                    <div *if="coll2">
                         <my-for-88>
                             <div draggable="true">
                                 <img
@@ -63,9 +58,7 @@ import { CheckDetectChange, Component, Inject, ViewChild } from 'mark5';
                                 ></img>
                             </div>
                         </my-for-88>
-                    </div>
                     <div class="collapse-header" @click="changeCollapse($event,'coll3')">> dialog</div>
-                    <div *if="coll3">
                         <my-for-77>
                             <div draggable="true">
                                 <img
@@ -77,9 +70,7 @@ import { CheckDetectChange, Component, Inject, ViewChild } from 'mark5';
                                 ></img>
                             </div>
                         </my-for-77>
-                    </div>
                     <div class="collapse-header" @click="changeCollapse($event,'coll4')">> process</div>
-                    <div *if="coll4">
                         <my-for-66>
                             <div draggable="true">
                                 <img
@@ -91,7 +82,6 @@ import { CheckDetectChange, Component, Inject, ViewChild } from 'mark5';
                                 ></img>
                             </div>
                         </my-for-66>
-                    </div>
 
                 </div>
                 
@@ -198,11 +188,6 @@ class MyComponent {
     focusNode: any = null;
     focusCombo: any = null;
     jsonOnEdit: boolean = false;
-    coll: boolean = true;
-    coll0: boolean = true;
-    coll2: boolean = true;
-    coll3: boolean = true;
-    coll4: boolean = true;
     config = [];
     sourceList = [];
     targetList = [];
@@ -221,7 +206,6 @@ class MyComponent {
                 container: 'scaleX',
                 width: 1942,
                 height: 22,
-                // translate the graph to align the canvas's center, support by v3.5.1
                 defaultNode: {
                     type: 'modelRect',
                 },
@@ -230,7 +214,6 @@ class MyComponent {
                 container: 'scaleY',
                 width: 22,
                 height: 1102,
-                // translate the graph to align the canvas's center, support by v3.5.1
                 defaultNode: {
                     type: 'modelRect',
                 },
@@ -657,7 +640,6 @@ class MyComponent {
                 container: 'design-view',
                 width,
                 height,
-                // translate the graph to align the canvas's center, support by v3.5.1
                 defaultNode: {
                     type: 'modelRect',
                 },
@@ -791,6 +773,7 @@ class MyComponent {
         const graph = this.graph;
         window['graph'] = graph;
         graph.on('click', (evt) => {
+            this.config = [{}, {}];
             const { item } = evt;
             this.focusCombo = item;
             if (item !== this.focusNode) {
@@ -802,6 +785,7 @@ class MyComponent {
                     this.cd.detectChanges();
                 }
             }
+            this.cd.detectChanges();
         });
         graph.on('node:click', (evt) => {
             this.focusCombo = null;

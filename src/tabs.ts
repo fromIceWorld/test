@@ -3,14 +3,14 @@ import { Component, EventEmitter, Input, Output } from 'mark5';
     selector: `app-tab`,
     template: `
     <p>数据：</p>
-        <h5>attributes:</h5>
-        <div *forOf="Object.entries(config[0] ||[])">
-            <div>{{item[0]}} : </div>
+        <div style="border-bottom: 2px solid #cb8132ba;color: #008000b5;margin: 10px 0 0 0;">attributes:</div>
+        <div *forOf="Object.entries(config[0] ||[])" style="padding: 0 0 0 5px;">
+            <div style="font-size: 12px;color: #ff0000ba;padding: 4px 0;">{{item[0]}} : </div>
             <span contenteditable @blur="emitUpdate($event,item[0],'attributes')" @focus="onEdit($event)">{{item[1]}}</span>
         </div>
-        <h5>properties:</h5>
-        <div *forOf="Object.entries(config[1] ||[])">
-            <div>{{item[0]}} : </div>
+        <div style="border-bottom: 2px solid #cb8132ba;color: #008000b5;margin: 10px 0 0 0;">properties:</div>
+        <div *forOf="Object.entries(config[1] ||[])" style="padding: 0 0 0 5px;">
+            <div style="font-size: 12px;color: #ff0000ba;padding: 4px 0;">{{item[0]}} : </div>
             <span contenteditable @blur="emitUpdate($event,item[0],'properties')" @focus="onEdit($event)">{{item[1]}}</span>
         </div>
         <p>布局：</p>

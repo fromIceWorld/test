@@ -1,4 +1,4 @@
-class INPUT_BOX_CONFIG extends COMBINATION_CONFIG {
+class CONTAINER_CONFIG extends COMBINATION_CONFIG {
     className = 'MyContainer';
     html = {
         attributes: {},
@@ -15,10 +15,10 @@ class INPUT_BOX_CONFIG extends COMBINATION_CONFIG {
         methods: [],
     };
 }
-configModule['INPUT_BOX_CONFIG'] = INPUT_BOX_CONFIG;
+configModule['CONTAINER_CONFIG'] = CONTAINER_CONFIG;
 
 G6.registerCombo(
-    'input_box',
+    'container',
     {
         options: {
             style: {

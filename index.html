@@ -5,11 +5,11 @@
         <title>test</title>
         <link rel="icon" href="../menu/jigsaw-puzzle.svg" type="image/x-icon" />
         <style>
-             :root{
-            --button-background-color: #1890ff;
-            --button-color: #FFFFFF;
-            --button-border-color: #1890ff;
-        }
+            :root {
+                --button-background-color: #1890ff;
+                --button-color: #ffffff;
+                --button-border-color: #1890ff;
+            }
             .container {
                 width: 300px;
                 height: 300px;
@@ -22,6 +22,9 @@
                 position: absolute;
                 top: 823px;
             }
+            foreignObject{
+                width: 177px !important;
+            }
         </style>
     </head>
     <body>
@@ -29,6 +32,43 @@
     </body>
     <script>
         const configModule = {};
+    </script>
+    <script src="./g6.min.js"></script>
+    <script>
+        G6.registerNode(
+            'dom-node',
+            {
+                draw: (cfg, group) => {
+                    return group.addShape('dom', {
+                        attrs: {
+                            width: 130,
+                            height: 30,
+                            // 传入 DOM 的 html
+                            html: `<input is="my-input" draggable="true" list='[{"label":12}]' placeholder="请输入姓名"></input>`,
+                        },
+                        draggable: true,
+                    });
+                },
+            },
+            'single-node'
+        );
+        G6.registerNode(
+            'my-select-0',
+            {
+                draw: (cfg, group) => {
+                    return group.addShape('dom', {
+                        attrs: {
+                            width: 130,
+                            height: 30,
+                            // 传入 DOM 的 html
+                            html: `<my-select-0></my-select-0>`,
+                        },
+                        draggable: true,
+                    });
+                },
+            },
+            'single-node'
+        );
     </script>
     <script src="../block/lib/umd/index.js"></script>
     <script src="../custom-webcomponents/bundle/index.js"></script>
@@ -85,7 +125,7 @@
                     super();
                     this.options = [
                             {
-                            id: 'input_box',
+                            id: 'container',
                             type: 'combo',
                             title: '布局容器',
                             img: '../menu/input-box.svg',
@@ -163,13 +203,12 @@
             customElements.define('my-select-55', MySelect55)
         }
     </script>
-    <script src="./g6.min.js"></script>
     <script src="./common/index.js"></script>
     <script src="./common/scaleX.js"></script>
     <script src="./common/scaleY.js"></script>
     <script src="./menu/container/base/index.js"></script>
     <script src="./menu/node/base/index.js"></script>
-    <script src="./menu/form/input-box.js"></script>
+    <script src="./menu/layout/container.js"></script>
     <script src="./menu/process/for.js"></script>
     <script src="./menu/process/if.js"></script>
     <script src="./menu/dialog/index.js"></script>
@@ -181,6 +220,5 @@
     <script src="./mouse-menu//right-menu/index.js"></script>
     <script src="./dist/main.js"></script>
     <link href ="../fragment/common.css" rel="stylesheet"></link>
-    <link href ="./drag.css" rel="stylesheet"></link>
-
+    <link href ="./drag.css" rel="stylesheet"></link>  
 </html>

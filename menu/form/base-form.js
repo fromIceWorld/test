@@ -29,7 +29,7 @@ class FORM_CONFIG extends COMBINATION_CONFIG {
             formgroup: 'fg',
         },
         properties: {
-            api: '/test/list',
+            api: 'https://www.fastmock.site/mock/14c2723aefa052a75b2a6feeed0cf387/suger/records',
         },
     };
     css = {
@@ -51,6 +51,16 @@ class FORM_CONFIG extends COMBINATION_CONFIG {
             {
                 label: 'reset',
                 value: 'reset',
+                children: [],
+            },
+            {
+                label: '200',
+                value: '200',
+                children: [],
+            },
+            {
+                label: '500',
+                value: '500',
                 children: [],
             },
         ],

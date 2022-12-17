@@ -21,7 +21,20 @@ import { CheckDetectChange, Component, Inject, ViewChild } from 'mark5';
                 width="20px"
                 @click="changeView($event)"
             ></img>
+            
             <div class="collapse">
+            <div class="collapse-header" @click="changeCollapse($event,'coll2')">> layout</div>
+                        <my-for-88>
+                            <div draggable="true">
+                                <img
+                                    title="{{title}}"
+                                    src="{{img}}"
+                                    width="20px"
+                                    id="{{id}}"
+                                    type="{{type}}"
+                                ></img>
+                            </div>
+                        </my-for-88>
                 <div class="collapse-header" @click="changeCollapse($event,'coll0')">> base</div>
                         <my-for-00>
                             <div draggable="true">
@@ -46,18 +59,7 @@ import { CheckDetectChange, Component, Inject, ViewChild } from 'mark5';
                                 ></img>
                             </div>
                         </my-for-99>
-                    <div class="collapse-header" @click="changeCollapse($event,'coll2')">> flex</div>
-                        <my-for-88>
-                            <div draggable="true">
-                                <img
-                                    title="{{title}}"
-                                    src="{{img}}"
-                                    width="20px"
-                                    id="{{id}}"
-                                    type="{{type}}"
-                                ></img>
-                            </div>
-                        </my-for-88>
+                    
                     <div class="collapse-header" @click="changeCollapse($event,'coll3')">> dialog</div>
                         <my-for-77>
                             <div draggable="true">
@@ -192,6 +194,7 @@ class MyComponent {
     sourceList = [];
     targetList = [];
     sourceOutput = [];
+    sourceMethods = [];
     targetOutput = [];
     newEdge;
     sourceSelect;
@@ -225,7 +228,7 @@ class MyComponent {
         const { value, source } = e.detail;
         let target = source.options.filter((item) => item.label === value)[0];
         this.eventLine[0][index] = value;
-        if (index == '1') {
+        if (index == '0') {
             return;
         }
         // 切换 respond 选项
@@ -238,7 +241,16 @@ class MyComponent {
                         const { html, js, tagName } = bundle[
                             'MySelect'
                         ].extends({
-                            options: JSON.stringify(this.targetOutput),
+                            html: {
+                                attributes: {
+                                    options: JSON.stringify(this.sourceMethods),
+                                },
+                                properties: {},
+                            },
+                            css: {
+                                classes: '',
+                                style: {},
+                            },
                         });
                         this.eventLine.push([this.level2[index].label]);
                         tagNames.push(tagName);
@@ -378,15 +390,15 @@ class MyComponent {
                         .split('\n')
                         .map((eventToFn: string) => eventToFn.split('->'));
                 const eventJs = `
-                sourceDOM = document.querySelector('${this.idMapTag.get(
-                    source
-                )}');
-                targetDOM = document.querySelector('${this.idMapTag.get(
-                    target
-                )}');
                 //初始化事件
                 ${JSON.stringify(eventsArray)}.forEach((fnTofn, index)=>{
                     const [event,fn] = fnTofn;
+                    const sourceDOM = document.querySelector('${this.idMapTag.get(
+                        source
+                    )}'),
+                        targetDOM = document.querySelector('${this.idMapTag.get(
+                            target
+                        )}');
                     if(index === 0){
                         sourceDOM.addEventListener(event, (e)=>{
                             targetDOM[fn]();
@@ -733,12 +745,13 @@ class MyComponent {
         graph.on('aftercreateedge', (e) => {
             const newEdge = e.edge,
                 { sourceNode, targetNode } = newEdge._cfg,
-                { event: sourceOutput } =
+                { event: sourceOutput, methods: sourceMethods } =
                     sourceNode._cfg.model.config.component,
                 { methods: targetOutput } =
                     targetNode._cfg.model.config.component,
                 edges = graph.save().edges;
             this.sourceOutput = sourceOutput;
+            this.sourceMethods = sourceMethods;
             this.targetOutput = targetOutput;
             this.source1.changeOptions(sourceOutput);
             this.target1.changeOptions(targetOutput);

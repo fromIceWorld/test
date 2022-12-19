@@ -2,4 +2,17 @@ low-code 系统
 
 ## todo
 
-- 在loaclStorage存储后 config 类原型上的函数无法继承
+- table
+- tip
+- dropdown
+
+## todo
+
+- 组件style配置
+
+## todo
+
+- 路由
+## todo
+
+- 优化导出数据，导出一个自定义组件

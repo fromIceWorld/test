@@ -653,7 +653,7 @@ class MyComponent {
                 width,
                 height,
                 defaultNode: {
-                    type: 'modelRect',
+                    type: 'rect',
                 },
                 modes: {
                     default: ['drag-node', 'drag-combo'],
